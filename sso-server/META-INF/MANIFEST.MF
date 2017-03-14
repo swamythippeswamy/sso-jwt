@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Implementation-Title: sso-server
+Implementation-Version: 0.0.1-SNAPSHOT
+Archiver-Version: Plexus Archiver
+Built-By: ubuntu
+Implementation-Vendor-Id: com.onesandzeros
+Spring-Boot-Version: 1.4.0.RELEASE
+Implementation-Vendor: Pivotal Software, Inc.
+Main-Class: org.springframework.boot.loader.JarLauncher
+Start-Class: com.onesandzeros.springboot.SsoServiceApplication
+Spring-Boot-Classes: BOOT-INF/classes/
+Spring-Boot-Lib: BOOT-INF/lib/
+Created-By: Apache Maven 3.3.9
+Build-Jdk: 1.8.0_45-internal
+Implementation-URL: http://projects.spring.io/spring-boot/sso-server/
+
