@@ -2,7 +2,7 @@ package com.onesandzeros.models;
 
 import java.io.Serializable;
 
-public class ResponseModel<T> implements Serializable {
+public class BaseResponse<T> implements Serializable {
 
 	private static final long serialVersionUID = -4913375761240032408L;
 
@@ -10,7 +10,7 @@ public class ResponseModel<T> implements Serializable {
 
 	private T data;
 
-	public ResponseModel(int code, T data) {
+	public BaseResponse(int code, T data) {
 		this.code = code;
 		this.data = data;
 	}

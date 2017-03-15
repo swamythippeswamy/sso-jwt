@@ -104,8 +104,14 @@ public class JwtSecurityService {
 				throw new JwtException("Missing required 'kid' header param in JWT with claims: " + claims);
 			}
 			Key key = publicKeys.get(keyId);
+
+			// Refresh the public key if key not found for the keyId
 			if (key == null) {
-				throw new JwtException("No public key registered for kid: " + keyId + ". JWT claims: " + claims);
+				refreshPublicKey();
+				key = publicKeys.get(keyId);
+				if (key == null) {
+					throw new JwtException("No public key registered for kid: " + keyId + ". JWT claims: " + claims);
+				}
 			}
 			return key;
 		}

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import com.onesandzeros.exceptions.ServiceException;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jws;
@@ -26,7 +28,7 @@ public class JwtTokenParser {
 	@Autowired
 	private JwtSecurityService securityService;
 
-	public String getAuthToken(String jwtHeader) throws Exception {
+	public String getAuthToken(String jwtHeader) throws ServiceException {
 		String tokenSub = null;
 		try {
 			String jwtTokenVal = parseTokenValueFromHeader(jwtHeader);
@@ -39,27 +41,12 @@ public class JwtTokenParser {
 			}
 		} catch (SignatureException e) {
 			LOGGER.error("SignatureException during token parsing", e);
-			throw new SignatureException(e.getMessage());
 		} catch (Exception e) {
 			LOGGER.error("Exception during token parsing", e);
 		}
 
 		LOGGER.info("tokenSub : {}", tokenSub);
 		return tokenSub;
-	}
-
-	private Key getSigningKey(String jsonToken) {
-		Key publicKey = null;
-		Header jwtHeader = Jwts.parser().parse(jsonToken).getHeader();
-		LOGGER.info("Jwt Header is : {}", jwtHeader);
-		if (jwtHeader.containsKey(JwsHeader.KEY_ID)) {
-			String keyId = (String) jwtHeader.get(JwsHeader.KEY_ID);
-
-			LOGGER.info("KeyId in header is : {}", keyId);
-			publicKey = securityService.getPublicKey(keyId);
-		}
-
-		return publicKey;
 	}
 
 	private String parseTokenValueFromHeader(String jwtHeader) {

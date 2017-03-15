@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.onesandzeros.aspects.JwtAuthentication;
+import com.onesandzeros.exceptions.ServiceException;
 import com.onesandzeros.jwttoken.service.JwtSigningKeyService;
 import com.onesandzeros.model.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.models.PublicKeyData;
-import com.onesandzeros.models.ResponseModel;
+import com.onesandzeros.models.BaseResponse;
 import com.onesandzeros.service.SSOAuthService;
 
 @RestController
@@ -37,12 +38,12 @@ public class SSOAuthController {
 	}
 
 	@RequestMapping("/login")
-	public @ResponseBody ResponseModel<String> login(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
-			HttpServletResponse response) {
+	public @ResponseBody BaseResponse<String> login(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
+			HttpServletResponse response) throws ServiceException {
 		LOGGER.info("login api");
 		UserAccountEntity userAccntInfo = ssoService.login(request, response, loginPayload);
 		LOGGER.info("return data : {}", userAccntInfo);
-		return new ResponseModel<String>(HttpStatus.OK.value(), "Login successful");
+		return new BaseResponse<String>(HttpStatus.OK.value(), "Login successful");
 	}
 
 	@RequestMapping("/register")
@@ -54,11 +55,11 @@ public class SSOAuthController {
 
 	@RequestMapping("/accountInfo")
 	@JwtAuthentication
-	public @ResponseBody ResponseModel<UserAccountEntity> getAccountInfo() {
+	public @ResponseBody BaseResponse<UserAccountEntity> getAccountInfo() throws ServiceException {
 		LOGGER.info("Get AccountInfo api");
 		UserAccountEntity userAccntInfo = ssoService.getAccountInfo();
 		LOGGER.info("return data : {}", userAccntInfo);
-		return new ResponseModel<UserAccountEntity>(HttpStatus.OK.value(), userAccntInfo);
+		return new BaseResponse<UserAccountEntity>(HttpStatus.OK.value(), userAccntInfo);
 	}
 
 	@RequestMapping("/getPublicKey")

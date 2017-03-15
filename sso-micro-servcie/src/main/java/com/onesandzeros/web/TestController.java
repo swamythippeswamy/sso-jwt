@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.onesandzeros.aspects.JwtAuthentication;
 import com.onesandzeros.jwttoken.service.JwtSecurityService;
 import com.onesandzeros.models.PublicKeyData;
-import com.onesandzeros.models.ResponseModel;
+import com.onesandzeros.models.BaseResponse;
+import com.onesandzeros.models.SessionData;
+import com.onesandzeros.models.UserInfo;
 
 @RestController
 public class TestController {
@@ -31,8 +33,8 @@ public class TestController {
 
 	@JwtAuthentication
 	@RequestMapping("/verifyToken")
-	public ResponseModel<String> testAnnot() {
-		return new ResponseModel<String>(HttpStatus.OK.value(), "test success");
+	public BaseResponse<UserInfo> testAnnot() {
+		return new BaseResponse<UserInfo>(HttpStatus.OK.value(), SessionData.getUserInfo());
 	}
 
 }

@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.onesandzeros.jwttoken.service.JwtTokenParser;
-import com.onesandzeros.models.ResponseModel;
+import com.onesandzeros.models.BaseResponse;
 import com.onesandzeros.models.SessionData;
 import com.onesandzeros.models.UserInfo;
 import com.onesandzeros.util.JsonUtil;
@@ -52,7 +52,7 @@ public class JwtAuthAspect {
 
 		if (null == jwtAuthHeaderVal) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			return new ResponseModel<String>(HttpStatus.UNAUTHORIZED.value(), "Auth header is missing");
+			return new BaseResponse<String>(HttpStatus.UNAUTHORIZED.value(), "Auth header is missing");
 		}
 
 		String userInfoStr = null;
@@ -61,12 +61,12 @@ public class JwtAuthAspect {
 			LOGGER.info("JWT token decoded userName : {}", userInfoStr);
 			if (null == userInfoStr) {
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
-				return new ResponseModel<String>(HttpStatus.UNAUTHORIZED.value(),
+				return new BaseResponse<String>(HttpStatus.UNAUTHORIZED.value(),
 						"Invalid jwt token, Authentication failure");
 			}
 		} catch (Exception e) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			return new ResponseModel<String>(HttpStatus.UNAUTHORIZED.value(),
+			return new BaseResponse<String>(HttpStatus.UNAUTHORIZED.value(),
 					"Invalid jwt token, Authentication failure");
 		}
 

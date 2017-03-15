@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import com.onesandzeros.exceptions.ServiceException;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -24,7 +26,7 @@ public class JwtTokenParser {
 	@Autowired
 	JwtSigningKeyService keyService;
 
-	public String getAuthToken(String jwtHeader) throws Exception {
+	public String getAuthToken(String jwtHeader) {
 		String tokenSub = null;
 		try {
 			String jwtToken = parseTokenValueFromHeader(jwtHeader);
@@ -34,10 +36,9 @@ public class JwtTokenParser {
 				tokenSub = claims.getBody().getSubject();
 			}
 		} catch (SignatureException e) {
-			LOGGER.info("SignatureException during token parsing");
-			throw new SignatureException(e.getMessage());
+			LOGGER.error("SignatureException during token parsing");
 		} catch (Exception e) {
-			LOGGER.info("Exception during token parsing");
+			LOGGER.error("Exception during token parsing");
 		}
 
 		LOGGER.info("tokenSub : {}", tokenSub);

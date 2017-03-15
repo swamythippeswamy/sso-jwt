@@ -15,12 +15,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.onesandzeros.dao.SSOAuthDao;
+import com.onesandzeros.exceptions.DaoException;
+import com.onesandzeros.exceptions.ServiceException;
 import com.onesandzeros.jwttoken.service.JwtTokenBuilder;
 import com.onesandzeros.model.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.models.SessionData;
 import com.onesandzeros.models.UserInfo;
 import com.onesandzeros.service.SSOAuthService;
+import com.onesandzeros.util.CommonUtil;
 
 @Service
 public class SSOAuthServiceImpl implements SSOAuthService {
@@ -35,26 +38,43 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public UserAccountEntity login(HttpServletRequest request, HttpServletResponse response, LoginPayload userDetails) {
+	public UserAccountEntity login(HttpServletRequest request, HttpServletResponse response, LoginPayload userDetails)
+			throws ServiceException {
 		UserAccountEntity userAccInfo = null;
-		if (userDetails.getAccountType() == EMAIL) {
-			userAccInfo = ssoAuthDao.findByEmail(userDetails.getEmail());
-		} else if (userDetails.getAccountType() == FACEBOOK) {
 
-		} else if (userDetails.getAccountType() == GOOGLE) {
+		try {
+			if (userDetails.getAccountType() == EMAIL) {
+				validate(userDetails);
+				userAccInfo = ssoAuthDao.findByEmail(userDetails.getEmail());
+			} else if (userDetails.getAccountType() == FACEBOOK) {
 
-		} else if (userDetails.getAccountType() == PHONE) {
+			} else if (userDetails.getAccountType() == GOOGLE) {
 
+			} else if (userDetails.getAccountType() == PHONE) {
+
+			}
+			LOGGER.info("userDetails : {}, userAccInfo : {}", userDetails, userAccInfo);
+			if (null == userAccInfo) {
+
+			}
+		} catch (DaoException e) {
+			LOGGER.error("Error in login", e);
+			throw new ServiceException("Error in login", e);
 		}
-		LOGGER.info("userDetails : {}, userAccInfo : {}", userDetails, userAccInfo);
-		if (null == userAccInfo) {
-			
-		}
-
 		UserInfo userInfo = new UserInfo(userAccInfo.getName(), userAccInfo.getEmail());
 
 		tokenBuilder.addAuthToken(response, userInfo);
 		return userAccInfo;
+	}
+
+	private void validate(LoginPayload userDetails) throws ServiceException {
+
+		if (!CommonUtil.validateEmail(userDetails.getEmail())) {
+			throw new ServiceException("Invalid EmailId");
+		}
+		if (!CommonUtil.validatePassword(userDetails.getPassword())) {
+			throw new ServiceException("Invalid Password");
+		}
 	}
 
 	@Override
@@ -64,8 +84,15 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public UserAccountEntity getAccountInfo() {
-		return ssoAuthDao.findByEmail(SessionData.getUserInfo().getEmailId());
+	public UserAccountEntity getAccountInfo() throws ServiceException {
+		UserAccountEntity entity = null;
+		try {
+			entity = ssoAuthDao.findByEmail(SessionData.getUserInfo().getEmailId());
+		} catch (DaoException e) {
+			LOGGER.error("Error in getting the data from db", e);
+			throw new ServiceException("Error in getting the data from db");
+		}
+		return entity;
 	}
 
 }

@@ -9,6 +9,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * 
+ * @author swamy
+ *
+ */
 public class JsonUtil {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JsonUtil.class);
