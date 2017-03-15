@@ -54,7 +54,7 @@ public class JwtTokenBuilder {
 	}
 
 	private Key getSigningKey() {
-		return keyService.getSigningKey();
+		return keyService.getPrivateKey();
 	}
 
 }

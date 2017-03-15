@@ -96,7 +96,7 @@ public class JwtSecurityService {
 		return key;
 	}
 
-	public class SinginKeyResolverAdapter implements SigningKeyResolver {
+	public class SigninKeyResolverAdapter implements SigningKeyResolver {
 		@Override
 		public Key resolveSigningKey(JwsHeader header, Claims claims) {
 			String keyId = header.getKeyId();
@@ -119,7 +119,7 @@ public class JwtSecurityService {
 
 	public SigningKeyResolver getResolver() {
 		if (null == resolver) {
-			resolver = new SigningKeyResolverAdapter();
+			resolver = new SigninKeyResolverAdapter();
 		}
 		return resolver;
 	}

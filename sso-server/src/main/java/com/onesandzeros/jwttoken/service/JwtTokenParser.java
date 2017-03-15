@@ -1,5 +1,7 @@
 package com.onesandzeros.jwttoken.service;
 
+import java.security.Key;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +21,13 @@ public class JwtTokenParser {
 	@Autowired
 	Environment env;
 
+	@Autowired
+	JwtSigningKeyService keyService;
+
 	public String getAuthToken(String jwtHeader) throws Exception {
 		String tokenSub = null;
 		try {
-			String jwtToken = jwtHeader;
-			if (jwtHeader.contains("Bearer")) {
-				jwtToken = jwtHeader.substring(7);
-			}
+			String jwtToken = parseTokenValueFromHeader(jwtHeader);
 			Jws<Claims> claims = Jwts.parser().setSigningKey(getSigningKey()).parseClaimsJws(jwtToken);
 			LOGGER.info("claims.getBody() : {}", claims.getBody());
 			if (null != claims && null != claims.getBody()) {
@@ -42,7 +44,15 @@ public class JwtTokenParser {
 		return tokenSub;
 	}
 
-	private String getSigningKey() {
-		return env.getProperty("jwt.signin.key", "test");
+	private Key getSigningKey() {
+		return keyService.getPublicKey();
+	}
+
+	private String parseTokenValueFromHeader(String jwtHeader) {
+		String jwtToken = jwtHeader;
+		if (jwtHeader.contains("Bearer")) {
+			jwtToken = jwtHeader.substring(7);
+		}
+		return jwtToken;
 	}
 }

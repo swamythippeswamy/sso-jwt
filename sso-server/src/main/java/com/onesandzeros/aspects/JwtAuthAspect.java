@@ -102,7 +102,4 @@ public class JwtAuthAspect {
 			LOGGER.info("Header- Key : {}, Value : {}", headerKey, headerVal);
 		}
 	}
-
-	private void initializeSessionData(UserInfo info) {
-	}
 }

@@ -53,11 +53,18 @@ public class JwtSigningKeyService {
 		LOGGER.info("Microservices Hosts : {}", hostsCsv);
 	}
 
-	public Key getSigningKey() {
+	public Key getPrivateKey() {
 		if (null == keyPair) {
 			generateKeyPair();
 		}
 		return keyPair.getPrivate();
+	}
+
+	public Key getPublicKey() {
+		if (null == keyPair) {
+			generateKeyPair();
+		}
+		return keyPair.getPublic();
 	}
 
 	public String getKeyId() {

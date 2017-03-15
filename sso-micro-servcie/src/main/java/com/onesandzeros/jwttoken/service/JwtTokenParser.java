@@ -48,9 +48,10 @@ public class JwtTokenParser {
 		return tokenSub;
 	}
 
-	private Key getSigningKey(String headerVal) {
+	private Key getSigningKey(String jsonToken) {
 		Key publicKey = null;
-		Header jwtHeader = Jwts.parser().parse(headerVal).getHeader();
+		Header jwtHeader = Jwts.parser().parse(jsonToken).getHeader();
+		LOGGER.info("Jwt Header is : {}", jwtHeader);
 		if (jwtHeader.containsKey(JwsHeader.KEY_ID)) {
 			String keyId = (String) jwtHeader.get(JwsHeader.KEY_ID);
 
