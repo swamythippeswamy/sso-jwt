@@ -12,6 +12,7 @@ public class UserInfo implements Serializable {
 	private static final long serialVersionUID = -6870910757476030312L;
 	private String userName;
 	private String emailId;
+	private AccountType accountType;
 	private String role;
 
 	public UserInfo() {
@@ -39,6 +40,14 @@ public class UserInfo implements Serializable {
 		this.emailId = emailId;
 	}
 
+	public AccountType getAccountType() {
+		return accountType;
+	}
+
+	public void setAccountType(AccountType accountType) {
+		this.accountType = accountType;
+	}
+
 	public String getRole() {
 		return role;
 	}
@@ -49,7 +58,8 @@ public class UserInfo implements Serializable {
 
 	@Override
 	public String toString() {
-		return "UserInfo [userName=" + userName + ", emailId=" + emailId + ", role=" + role + "]";
+		return "UserInfo [userName=" + userName + ", emailId=" + emailId + ", accountType=" + accountType + ", role="
+				+ role + "]";
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.onesandzeros.model.register;
+package com.onesandzeros.models;
 
 public enum AccountType {
 	EMAIL, PHONE, GOOGLE, FACEBOOK

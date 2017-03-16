@@ -2,6 +2,8 @@ package com.onesandzeros.model.register;
 
 import java.io.Serializable;
 
+import com.onesandzeros.models.AccountType;
+
 /**
  * 
  * Model used as Request Payload for login and register
@@ -17,6 +19,7 @@ public class LoginPayload implements Serializable {
 	private String phone;
 	private String password;
 	private AccountType accountType;
+	private String token;
 
 	public String getName() {
 		return name;
@@ -58,9 +61,17 @@ public class LoginPayload implements Serializable {
 		this.accountType = accountType;
 	}
 
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
 	@Override
 	public String toString() {
 		return "LoginPayload [name=" + name + ", email=" + email + ", phone=" + phone + ", password=" + password
-				+ ", accountType=" + accountType + "]";
+				+ ", accountType=" + accountType + ", token=" + token + "]";
 	}
 }

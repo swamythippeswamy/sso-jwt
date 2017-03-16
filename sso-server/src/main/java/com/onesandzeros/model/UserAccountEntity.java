@@ -7,10 +7,14 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.onesandzeros.model.register.AccountType;
+import org.hibernate.annotations.GenericGenerator;
+
+import com.onesandzeros.models.AccountType;
 
 @Entity
 @Table(name = "user_account")
@@ -19,6 +23,8 @@ public class UserAccountEntity implements Serializable {
 	private static final long serialVersionUID = 6036682665976681403L;
 
 	@Id
+	@GenericGenerator(name = "gen", strategy = "identity")
+	@GeneratedValue(generator = "gen", strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column(name = "user_name")
@@ -39,6 +45,12 @@ public class UserAccountEntity implements Serializable {
 
 	@Column(name = "create_time")
 	private Timestamp createTime;
+
+	@Column(name = "last_login_time")
+	private Timestamp lastLoginTime;
+
+	@Column(name = "fb_user_id")
+	private String facebookUserId;
 
 	public String getName() {
 		return name;
@@ -96,10 +108,27 @@ public class UserAccountEntity implements Serializable {
 		this.createTime = createTime;
 	}
 
+	public String getFacebookUserId() {
+		return facebookUserId;
+	}
+
+	public void setFacebookUserId(String facebookUserId) {
+		this.facebookUserId = facebookUserId;
+	}
+
+	public Timestamp getLastLoginTime() {
+		return lastLoginTime;
+	}
+
+	public void setLastLoginTime(Timestamp lastLoginTime) {
+		this.lastLoginTime = lastLoginTime;
+	}
+
 	@Override
 	public String toString() {
-		return "AccountInfo [id=" + id + ", name=" + name + ", email=" + email + ", phone=" + phone + ", password="
-				+ password + ", accountType=" + accountType + ", createTime=" + createTime + "]";
+		return "UserAccountEntity [id=" + id + ", name=" + name + ", email=" + email + ", phone=" + phone
+				+ ", password=" + password + ", accountType=" + accountType + ", createTime=" + createTime
+				+ ", lastLoginTime=" + lastLoginTime + ", facebookUserId=" + facebookUserId + "]";
 	}
 
 }

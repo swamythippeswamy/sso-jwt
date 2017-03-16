@@ -41,8 +41,7 @@ public class SSOAuthController {
 	public @ResponseBody BaseResponse<String> login(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
 			HttpServletResponse response) throws ServiceException {
 		LOGGER.info("login api");
-		UserAccountEntity userAccntInfo = ssoService.login(request, response, loginPayload);
-		LOGGER.info("return data : {}", userAccntInfo);
+		ssoService.login(request, response, loginPayload);
 		return new BaseResponse<String>(HttpStatus.OK.value(), "Login successful");
 	}
 

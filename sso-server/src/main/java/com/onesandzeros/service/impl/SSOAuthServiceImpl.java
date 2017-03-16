@@ -1,9 +1,9 @@
 package com.onesandzeros.service.impl;
 
-import static com.onesandzeros.model.register.AccountType.EMAIL;
-import static com.onesandzeros.model.register.AccountType.FACEBOOK;
-import static com.onesandzeros.model.register.AccountType.GOOGLE;
-import static com.onesandzeros.model.register.AccountType.PHONE;
+import static com.onesandzeros.models.AccountType.EMAIL;
+import static com.onesandzeros.models.AccountType.FACEBOOK;
+import static com.onesandzeros.models.AccountType.GOOGLE;
+import static com.onesandzeros.models.AccountType.PHONE;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +21,11 @@ import com.onesandzeros.exceptions.ServiceException;
 import com.onesandzeros.jwttoken.service.JwtTokenBuilder;
 import com.onesandzeros.model.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
+import com.onesandzeros.model.register.LoginServiceResponse;
+import com.onesandzeros.models.BaseResponse;
 import com.onesandzeros.models.SessionData;
 import com.onesandzeros.models.UserInfo;
 import com.onesandzeros.service.SSOAuthService;
-import com.onesandzeros.util.CommonUtil;
 
 @Service
 public class SSOAuthServiceImpl implements SSOAuthService {
@@ -31,50 +33,44 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SSOAuthServiceImpl.class);
 
 	@Autowired
-	private SSOAuthDao ssoAuthDao;
-
-	@Autowired
 	private JwtTokenBuilder tokenBuilder;
 
+	@Autowired
+	private EmailLoginService emailLoginService;
+
+	@Autowired
+	private FacebookLoginService facebookLoginService;
+
+	@Autowired
+	private SSOAuthDao ssoAuthDao;
+
 	@Override
-	@Transactional(readOnly = true)
-	public UserAccountEntity login(HttpServletRequest request, HttpServletResponse response, LoginPayload userDetails)
-			throws ServiceException {
-		UserAccountEntity userAccInfo = null;
+	@Transactional
+	public BaseResponse<String> login(HttpServletRequest request, HttpServletResponse response,
+			LoginPayload loginPayload) throws ServiceException {
 
-		try {
-			if (userDetails.getAccountType() == EMAIL) {
-				validate(userDetails);
-				userAccInfo = ssoAuthDao.findByEmail(userDetails.getEmail());
-			} else if (userDetails.getAccountType() == FACEBOOK) {
+		BaseResponse<String> resp = new BaseResponse<>();
+		LoginServiceResponse<UserInfo> loginServiceResp = null;
 
-			} else if (userDetails.getAccountType() == GOOGLE) {
+		// TODO: (Swamy) Use factory method to get which login service to use
+		if (loginPayload.getAccountType() == EMAIL) {
+			loginServiceResp = emailLoginService.emailLogin(loginPayload);
+		} else if (loginPayload.getAccountType() == FACEBOOK) {
+			loginServiceResp = facebookLoginService.login(loginPayload);
 
-			} else if (userDetails.getAccountType() == PHONE) {
+		} else if (loginPayload.getAccountType() == GOOGLE) {
 
-			}
-			LOGGER.info("userDetails : {}, userAccInfo : {}", userDetails, userAccInfo);
-			if (null == userAccInfo) {
+		} else if (loginPayload.getAccountType() == PHONE) {
 
-			}
-		} catch (DaoException e) {
-			LOGGER.error("Error in login", e);
-			throw new ServiceException("Error in login", e);
 		}
-		UserInfo userInfo = new UserInfo(userAccInfo.getName(), userAccInfo.getEmail());
+		LOGGER.info("userDetails : {}", loginPayload);
 
-		tokenBuilder.addAuthToken(response, userInfo);
-		return userAccInfo;
-	}
-
-	private void validate(LoginPayload userDetails) throws ServiceException {
-
-		if (!CommonUtil.validateEmail(userDetails.getEmail())) {
-			throw new ServiceException("Invalid EmailId");
+		if (null != loginServiceResp && null != loginServiceResp.getData()) {
+			tokenBuilder.addAuthToken(response, loginServiceResp.getData());
 		}
-		if (!CommonUtil.validatePassword(userDetails.getPassword())) {
-			throw new ServiceException("Invalid Password");
-		}
+		resp.setCode(loginServiceResp.getStatus().getCode());
+		resp.setData(loginServiceResp.getStatus().getMessage());
+		return resp;
 	}
 
 	@Override

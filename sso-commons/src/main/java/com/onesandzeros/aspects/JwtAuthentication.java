@@ -14,7 +14,7 @@ import com.onesandzeros.models.BaseResponse;
  * This can be used where ever token validation required and user basic info is
  * needed.
  * 
- * Throws the error with response of type {@link BaseResponse}
+ * Throws the error with response of type {@link BaseResponse}, Method using this annotation 
  * 
  * @author swamy
  *

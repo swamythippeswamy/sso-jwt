@@ -10,6 +10,9 @@ public class BaseResponse<T> implements Serializable {
 
 	private T data;
 
+	public BaseResponse() {
+	}
+
 	public BaseResponse(int code, T data) {
 		this.code = code;
 		this.data = data;

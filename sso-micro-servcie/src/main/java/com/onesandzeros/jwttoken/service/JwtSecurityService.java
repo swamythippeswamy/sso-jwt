@@ -100,8 +100,9 @@ public class JwtSecurityService {
 		@Override
 		public Key resolveSigningKey(JwsHeader header, Claims claims) {
 			String keyId = header.getKeyId();
-			if (!Strings.hasText(keyId)) {
-				throw new JwtException("Missing required 'kid' header param in JWT with claims: " + claims);
+			if (!StringUtils.isEmpty(keyId)) {
+				LOGGER.error("Header kid is missing in the token header with cliams: {} ", claims);
+				throw new JwtException("Header kid is missing in the token header with cliams " + claims);
 			}
 			Key key = publicKeys.get(keyId);
 
@@ -109,8 +110,10 @@ public class JwtSecurityService {
 			if (key == null) {
 				refreshPublicKey();
 				key = publicKeys.get(keyId);
+
 				if (key == null) {
-					throw new JwtException("No public key registered for kid: " + keyId + ". JWT claims: " + claims);
+					LOGGER.error("No key found for the keyId : {} and claims : {}", keyId, claims);
+					throw new JwtException("No key found for the keyId : " + keyId + " and claims: " + claims);
 				}
 			}
 			return key;
