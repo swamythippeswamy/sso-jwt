@@ -3,13 +3,14 @@ package com.onesandzeros.social.model;
 public class FaceBookAuthResponse {
 
 	public static final int SUCCESS = 0;
-	public static final int FAILED = 0;
+	public static final int FAILED = 1;
 
 	String email;
 	String userId;
 	String name;
 	int status = SUCCESS;
 	boolean expired;
+	boolean invalid;
 
 	public String getEmail() {
 		return email;
@@ -51,10 +52,18 @@ public class FaceBookAuthResponse {
 		this.expired = expired;
 	}
 
+	public boolean isInvalid() {
+		return invalid;
+	}
+
+	public void setInvalid(boolean invalid) {
+		this.invalid = invalid;
+	}
+
 	@Override
 	public String toString() {
 		return "FaceBookAuthResponse [email=" + email + ", userId=" + userId + ", name=" + name + ", status=" + status
-				+ ", expired=" + expired + "]";
+				+ ", expired=" + expired + ", invalid=" + invalid + "]";
 	}
 
 }

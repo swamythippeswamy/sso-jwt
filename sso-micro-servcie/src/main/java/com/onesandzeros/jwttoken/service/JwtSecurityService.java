@@ -99,8 +99,10 @@ public class JwtSecurityService {
 	public class SigninKeyResolverAdapter implements SigningKeyResolver {
 		@Override
 		public Key resolveSigningKey(JwsHeader header, Claims claims) {
+			LOGGER.info("kid in header : {}", header.getKeyId());
+
 			String keyId = header.getKeyId();
-			if (!StringUtils.isEmpty(keyId)) {
+			if (StringUtils.isEmpty(keyId)) {
 				LOGGER.error("Header kid is missing in the token header with cliams: {} ", claims);
 				throw new JwtException("Header kid is missing in the token header with cliams " + claims);
 			}

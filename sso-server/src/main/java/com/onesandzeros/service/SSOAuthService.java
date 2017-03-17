@@ -9,10 +9,12 @@ import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.models.BaseResponse;
 
 public interface SSOAuthService {
-	void signup();
 
 	UserAccountEntity getAccountInfo() throws ServiceException;
 
 	BaseResponse<String> login(HttpServletRequest request, HttpServletResponse response, LoginPayload userDetails)
+			throws ServiceException;
+
+	BaseResponse<String> signup(HttpServletRequest request, HttpServletResponse response, LoginPayload loginPayload)
 			throws ServiceException;
 }

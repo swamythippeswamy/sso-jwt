@@ -36,6 +36,19 @@ public class RestServiceUtil {
 		return response;
 	}
 
+	public <T> T postRequest(String url, String postData, Class<T> responseClass) throws RestClientException {
+		T response = null;
+		HttpEntity<String> requestEnt = new HttpEntity<String>(postData, getDefaultHeaders());
+		ResponseEntity<T> responseEnt = restTemplate.exchange(url, HttpMethod.POST, requestEnt, responseClass);
+		if (responseEnt.getStatusCode() == HttpStatus.OK) {
+			response = responseEnt.getBody();
+		}
+		LOGGER.info("Request made to url : {}, response status : {}, response content : {}", url,
+				responseEnt.getStatusCode(), response);
+
+		return response;
+	}
+
 	private HttpHeaders getDefaultHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Content-Type", "application/json");

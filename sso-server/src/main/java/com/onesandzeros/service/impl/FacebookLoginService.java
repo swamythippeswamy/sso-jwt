@@ -33,6 +33,8 @@ public class FacebookLoginService {
 	public LoginServiceResponse<UserInfo> login(LoginPayload loginPayload) throws ServiceException {
 		FaceBookAuthResponse authResp = facebookAuth.authenticateToken(loginPayload.getToken());
 
+		LOGGER.info("AuthResponse generated : {}", authResp);
+
 		LoginServiceResponse<UserInfo> loginResp = new LoginServiceResponse<>();
 		if (authResp.getStatus() == FaceBookAuthResponse.SUCCESS) {
 			try {
@@ -46,8 +48,10 @@ public class FacebookLoginService {
 				userInfo.setAccountType(userAcctEnt.getAccountType());
 				userInfo.setUserName(userAcctEnt.getName());
 				userInfo.setEmailId(userAcctEnt.getEmail());
+				userInfo.setFbUserId(userAcctEnt.getFacebookUserId());
 
 				loginResp.setData(userInfo);
+				loginResp.setStatus(new Status(HttpStatus.OK.value(), "Login successful"));
 
 			} catch (DaoException e) {
 				LOGGER.error("Error in fetching user account info data from db", e);
@@ -56,11 +60,15 @@ public class FacebookLoginService {
 				throw new ServiceException(e.getMessage());
 			}
 		} else if (authResp.getStatus() == FaceBookAuthResponse.FAILED) {
-			LOGGER.error("Failure in authenticating the facebook");
-			loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Facebook Authentication failed"));
-			throw new ServiceException("Authentication failure exception");
+			LOGGER.error("Failure in authenticating user token with facebook");
+			if (authResp.isExpired()) {
+				loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Access token is expired"));
+			} else if (authResp.isInvalid()) {
+				loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid"));
+			}
 		}
 
+		LOGGER.info("LoginServiceResponse : {}", loginResp);
 		return loginResp;
 
 	}

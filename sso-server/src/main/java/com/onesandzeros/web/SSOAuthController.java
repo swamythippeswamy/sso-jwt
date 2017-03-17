@@ -40,18 +40,31 @@ public class SSOAuthController {
 	@RequestMapping("/login")
 	public @ResponseBody BaseResponse<String> login(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
 			HttpServletResponse response) throws ServiceException {
-		LOGGER.info("login api");
-		ssoService.login(request, response, loginPayload);
-		return new BaseResponse<String>(HttpStatus.OK.value(), "Login successful");
+		LOGGER.info("login api : {}", loginPayload);
+		BaseResponse<String> baseResp = ssoService.login(request, response, loginPayload);
+		return baseResp;
 	}
 
-	@RequestMapping("/register")
-	public String signup() {
-		LOGGER.info("signup api");
-		ssoService.signup();
-		return "Hello World!";
+	@RequestMapping("/signup")
+	public @ResponseBody BaseResponse<String> signup(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
+			HttpServletResponse response) throws ServiceException {
+		LOGGER.info("signup api : {}", loginPayload);
+		return ssoService.signup(request, response, loginPayload);
 	}
 
+	/**
+	 * API used by micro services to fetch the public key
+	 * 
+	 * @return {@link PublicKeyData}
+	 */
+	@RequestMapping("/getPublicKey")
+	public @ResponseBody PublicKeyData getPublicKey() {
+		LOGGER.info("Get Public key api");
+		PublicKeyData data = jwtSigningKeyService.getPublicKeyData();
+		return data;
+	}
+
+	// Testing api
 	@RequestMapping("/accountInfo")
 	@JwtAuthentication
 	public @ResponseBody BaseResponse<UserAccountEntity> getAccountInfo() throws ServiceException {
@@ -61,10 +74,4 @@ public class SSOAuthController {
 		return new BaseResponse<UserAccountEntity>(HttpStatus.OK.value(), userAccntInfo);
 	}
 
-	@RequestMapping("/getPublicKey")
-	public @ResponseBody PublicKeyData getPublicKey() {
-		LOGGER.info("Get Public key api");
-		PublicKeyData data = jwtSigningKeyService.getPublicKeyData();
-		return data;
-	}
 }

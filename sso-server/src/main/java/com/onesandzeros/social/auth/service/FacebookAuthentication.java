@@ -30,20 +30,15 @@ public class FacebookAuthentication {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FacebookAuthentication.class);
 
+	private static final int INVALID_TOKEN_ERROR_CODE = 190;
 	private static final int EXPIRED_TOKEN_ERROR_CODE = 100;
-
-	@Autowired
-	private Environment env;
 
 	public FaceBookAuthResponse authenticateToken(String token) {
 		FaceBookAuthResponse authResponse = new FaceBookAuthResponse();
 
 		LOGGER.info("Authenticating for accesstoken : {}", token);
 
-		ConfigurationBuilder cb = new ConfigurationBuilder().setOAuthAppId(env.getProperty("oauth.appId"))
-				.setOAuthAppSecret(env.getProperty("oauth.appSecret"));
-		Facebook faceBook = new FacebookFactory(cb.build()).getInstance();
-
+		Facebook faceBook = new FacebookFactory().getInstance(new AccessToken(token, null));
 		AccessToken accessToken = null;
 		User user = null;
 		try {
@@ -53,8 +48,11 @@ public class FacebookAuthentication {
 			}
 		} catch (FacebookException e) {
 			LOGGER.error("Error in authenticating user in facebook", e);
-			if (e.getErrorCode() == 109) {
+			if (e.getErrorCode() == EXPIRED_TOKEN_ERROR_CODE) {
 				authResponse.setExpired(true);
+			}
+			if (e.getErrorCode() == INVALID_TOKEN_ERROR_CODE) {
+				authResponse.setInvalid(true);
 			}
 			authResponse.setStatus(FaceBookAuthResponse.FAILED);
 			return authResponse;

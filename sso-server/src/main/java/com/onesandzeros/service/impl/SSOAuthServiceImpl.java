@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +53,7 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 		BaseResponse<String> resp = new BaseResponse<>();
 		LoginServiceResponse<UserInfo> loginServiceResp = null;
 
-		// TODO: (Swamy) Use factory method to get which login service to use
+		// TODO: (Swamy) Use factory pattern to get which login service to use
 		if (loginPayload.getAccountType() == EMAIL) {
 			loginServiceResp = emailLoginService.emailLogin(loginPayload);
 		} else if (loginPayload.getAccountType() == FACEBOOK) {
@@ -63,19 +64,26 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 		} else if (loginPayload.getAccountType() == PHONE) {
 
 		}
-		LOGGER.info("userDetails : {}", loginPayload);
+		LOGGER.info("loginServiceResp : {}", loginServiceResp);
 
-		if (null != loginServiceResp && null != loginServiceResp.getData()) {
-			tokenBuilder.addAuthToken(response, loginServiceResp.getData());
-		}
 		resp.setCode(loginServiceResp.getStatus().getCode());
 		resp.setData(loginServiceResp.getStatus().getMessage());
+
+		if (null != loginServiceResp.getData()) {
+			tokenBuilder.addAuthToken(response, loginServiceResp.getData());
+		} else {
+			LOGGER.error("Auth token not generated, since userinfo not available in loginServiceResponse");
+		}
 		return resp;
 	}
 
 	@Override
-	public void signup() {
+	public BaseResponse<String> signup(HttpServletRequest request, HttpServletResponse response,
+			LoginPayload loginPayload) throws ServiceException {
 		LOGGER.info("signup");
+		BaseResponse<String> resp = new BaseResponse<>();
+		emailLoginService.signUp(loginPayload);
+		return resp;
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.onesandzeros.dao.SSOAuthDao;
 import com.onesandzeros.exceptions.DaoException;
 import com.onesandzeros.exceptions.ServiceException;
+import com.onesandzeros.mail.service.MailClient;
 import com.onesandzeros.model.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.model.register.LoginServiceResponse;
@@ -24,6 +25,9 @@ public class EmailLoginService {
 
 	@Autowired
 	private SSOAuthDao ssoAuthDao;
+
+	@Autowired
+	private MailClient mailClient;
 
 	public LoginServiceResponse<UserInfo> emailLogin(LoginPayload loginPayload) throws ServiceException {
 		UserInfo userInfo = new UserInfo();
@@ -47,6 +51,13 @@ public class EmailLoginService {
 		loginResp.setData(userInfo);
 
 		return loginResp;
+
+	}
+
+	public LoginServiceResponse<UserInfo> signUp(LoginPayload loginPayload) throws ServiceException {
+		validate(loginPayload);
+		mailClient.prepareAndSend(loginPayload.getEmail(), "Test message");
+		return new LoginServiceResponse<>();
 
 	}
 

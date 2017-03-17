@@ -14,6 +14,7 @@ public class UserInfo implements Serializable {
 	private String emailId;
 	private AccountType accountType;
 	private String role;
+	private String fbUserId;
 
 	public UserInfo() {
 
@@ -56,10 +57,18 @@ public class UserInfo implements Serializable {
 		this.role = role;
 	}
 
+	public String getFbUserId() {
+		return fbUserId;
+	}
+
+	public void setFbUserId(String fbUserId) {
+		this.fbUserId = fbUserId;
+	}
+
 	@Override
 	public String toString() {
 		return "UserInfo [userName=" + userName + ", emailId=" + emailId + ", accountType=" + accountType + ", role="
-				+ role + "]";
+				+ role + ", fbUserId=" + fbUserId + "]";
 	}
 
 }
