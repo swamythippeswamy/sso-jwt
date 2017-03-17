@@ -58,11 +58,9 @@ public class EmailLoginService {
 		validate(loginPayload);
 		mailClient.prepareAndSend(loginPayload.getEmail(), "Test message");
 		return new LoginServiceResponse<>();
-
 	}
 
 	private void validate(LoginPayload userDetails) throws ServiceException {
-
 		if (!CommonUtil.validateEmail(userDetails.getEmail())) {
 			throw new ServiceException("Invalid EmailId");
 		}
