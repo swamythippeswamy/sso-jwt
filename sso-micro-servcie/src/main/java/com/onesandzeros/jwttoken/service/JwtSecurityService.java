@@ -2,7 +2,6 @@ package com.onesandzeros.jwttoken.service;
 
 import java.security.Key;
 import java.security.KeyFactory;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -27,8 +26,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SigningKeyResolver;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
-import io.jsonwebtoken.lang.Strings;
 
 @Service
 public class JwtSecurityService {

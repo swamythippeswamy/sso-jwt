@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import com.onesandzeros.dao.SSOAuthDao;
+import com.onesandzeros.dao.UserAccountDao;
 import com.onesandzeros.exceptions.DaoException;
 import com.onesandzeros.exceptions.ServiceException;
-import com.onesandzeros.model.UserAccountEntity;
+import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.model.register.LoginServiceResponse;
 import com.onesandzeros.model.register.Status;
@@ -28,7 +28,7 @@ public class FacebookLoginService {
 	private FacebookAuthentication facebookAuth;
 
 	@Autowired
-	private SSOAuthDao ssoAuthDao;
+	private UserAccountDao userActDao;
 
 	public LoginServiceResponse<UserInfo> login(LoginPayload loginPayload) throws ServiceException {
 		FaceBookAuthResponse authResp = facebookAuth.authenticateToken(loginPayload.getToken());
@@ -38,7 +38,7 @@ public class FacebookLoginService {
 		LoginServiceResponse<UserInfo> loginResp = new LoginServiceResponse<>();
 		if (authResp.getStatus() == FaceBookAuthResponse.SUCCESS) {
 			try {
-				UserAccountEntity userAcctEnt = ssoAuthDao.findByFacebookUserIdAndAccountType(authResp.getUserId(),
+				UserAccountEntity userAcctEnt = userActDao.findByFacebookUserIdAndAccountType(authResp.getUserId(),
 						AccountType.FACEBOOK);
 				if (null == userAcctEnt) {
 					userAcctEnt = addNewFacebookUser(authResp);
@@ -82,7 +82,7 @@ public class FacebookLoginService {
 
 		accountEntity.setName(authResp.getName());
 
-		ssoAuthDao.save(accountEntity);
+		userActDao.save(accountEntity);
 		return accountEntity;
 	}
 }

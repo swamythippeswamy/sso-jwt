@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `user_registration_token`;
 
 CREATE TABLE `user_registration_token` (
   `id` bigint(10) NOT NULL AUTO_INCREMENT,
-  `hash` varchar(35) NOT NULL,
+  `hash` varchar(30) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_id` bigint(10) NOT NULL,
   PRIMARY KEY (`id`)

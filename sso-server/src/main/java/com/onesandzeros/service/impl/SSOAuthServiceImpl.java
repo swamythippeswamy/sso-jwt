@@ -11,16 +11,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.onesandzeros.dao.SSOAuthDao;
+import com.onesandzeros.dao.UserAccountDao;
 import com.onesandzeros.exceptions.DaoException;
 import com.onesandzeros.exceptions.ServiceException;
 import com.onesandzeros.jwttoken.service.JwtTokenBuilder;
-import com.onesandzeros.model.UserAccountEntity;
+import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.model.register.LoginServiceResponse;
 import com.onesandzeros.models.BaseResponse;
@@ -43,7 +41,7 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 	private FacebookLoginService facebookLoginService;
 
 	@Autowired
-	private SSOAuthDao ssoAuthDao;
+	private UserAccountDao ssoAuthDao;
 
 	@Override
 	@Transactional
@@ -80,10 +78,9 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 	@Override
 	public BaseResponse<String> signup(HttpServletRequest request, HttpServletResponse response,
 			LoginPayload loginPayload) throws ServiceException {
-		LOGGER.info("signup");
-		BaseResponse<String> resp = new BaseResponse<>();
-		emailLoginService.signUp(loginPayload);
-		return resp;
+		LOGGER.info("signup : {}", loginPayload);
+		LoginServiceResponse<UserInfo> loginResp = emailLoginService.signUp(loginPayload);
+		return new BaseResponse<String>(loginResp.getStatus().getCode(), loginResp.getStatus().getMessage());
 	}
 
 	@Override

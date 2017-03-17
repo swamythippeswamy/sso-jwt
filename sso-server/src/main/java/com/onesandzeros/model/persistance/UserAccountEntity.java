@@ -1,4 +1,4 @@
-package com.onesandzeros.model;
+package com.onesandzeros.model.persistance;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -43,6 +43,9 @@ public class UserAccountEntity implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private AccountType accountType;
 
+	@Column(name = "active")
+	private boolean active;
+
 	@Column(name = "create_time")
 	private Timestamp createTime;
 
@@ -51,6 +54,9 @@ public class UserAccountEntity implements Serializable {
 
 	@Column(name = "fb_user_id")
 	private String facebookUserId;
+
+	@Column(name = "email_activated_on")
+	private Timestamp emailActivatedOn;
 
 	public String getName() {
 		return name;
@@ -100,6 +106,14 @@ public class UserAccountEntity implements Serializable {
 		this.id = id;
 	}
 
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
 	public Timestamp getCreateTime() {
 		return createTime;
 	}
@@ -124,11 +138,20 @@ public class UserAccountEntity implements Serializable {
 		this.lastLoginTime = lastLoginTime;
 	}
 
+	public Timestamp getEmailActivatedOn() {
+		return emailActivatedOn;
+	}
+
+	public void setEmailActivatedOn(Timestamp emailActivatedOn) {
+		this.emailActivatedOn = emailActivatedOn;
+	}
+
 	@Override
 	public String toString() {
 		return "UserAccountEntity [id=" + id + ", name=" + name + ", email=" + email + ", phone=" + phone
-				+ ", password=" + password + ", accountType=" + accountType + ", createTime=" + createTime
-				+ ", lastLoginTime=" + lastLoginTime + ", facebookUserId=" + facebookUserId + "]";
+				+ ", password=" + password + ", accountType=" + accountType + ", active=" + active + ", createTime="
+				+ createTime + ", lastLoginTime=" + lastLoginTime + ", facebookUserId=" + facebookUserId
+				+ ", emailActivatedOn=" + emailActivatedOn + "]";
 	}
 
 }

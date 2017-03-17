@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.onesandzeros.aspects.JwtAuthentication;
 import com.onesandzeros.exceptions.ServiceException;
 import com.onesandzeros.jwttoken.service.JwtSigningKeyService;
-import com.onesandzeros.model.UserAccountEntity;
+import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
-import com.onesandzeros.models.PublicKeyData;
 import com.onesandzeros.models.BaseResponse;
+import com.onesandzeros.models.PublicKeyData;
 import com.onesandzeros.service.SSOAuthService;
 
 @RestController

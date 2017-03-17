@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.onesandzeros.exceptions.ServiceException;
-import com.onesandzeros.model.UserAccountEntity;
+import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.models.BaseResponse;
 

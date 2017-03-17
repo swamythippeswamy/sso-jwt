@@ -2,13 +2,8 @@ package com.onesandzeros.social.auth.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import com.onesandzeros.exceptions.ServiceException;
-import com.onesandzeros.model.UserAccountEntity;
-import com.onesandzeros.service.impl.SSOAuthServiceImpl;
 import com.onesandzeros.social.model.FaceBookAuthResponse;
 
 import facebook4j.Facebook;
@@ -16,7 +11,6 @@ import facebook4j.FacebookException;
 import facebook4j.FacebookFactory;
 import facebook4j.User;
 import facebook4j.auth.AccessToken;
-import facebook4j.conf.ConfigurationBuilder;
 
 /**
  * 
