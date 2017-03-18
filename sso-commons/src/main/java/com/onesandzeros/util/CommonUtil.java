@@ -1,5 +1,10 @@
 package com.onesandzeros.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
@@ -46,5 +51,14 @@ public class CommonUtil {
 		return validPwd;
 	}
 
+	public static String readDataFromInputStream(InputStream in) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		StringBuilder jsonKeyData = new StringBuilder();
 
+		String line = "";
+		while ((line = reader.readLine()) != null) {
+			jsonKeyData.append(line);
+		}
+		return jsonKeyData.toString();
+	}
 }

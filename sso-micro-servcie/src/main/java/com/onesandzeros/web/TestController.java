@@ -21,15 +21,6 @@ public class TestController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestController.class);
 
-	@Autowired
-	private JwtTokenKeyService securityService;
-
-	@RequestMapping(value = "/addPublicKey", method = RequestMethod.POST)
-	public boolean addPublicKeys(@RequestBody PublicKeyData publicKeyData) {
-		LOGGER.info("addPublicKey Request : {}", publicKeyData);
-		return securityService.addPublicKey(publicKeyData);
-	}
-
 	@JwtAuthentication
 	@RequestMapping("/verifyToken")
 	public BaseResponse<UserInfo> testAnnot() {

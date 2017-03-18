@@ -1,8 +1,14 @@
 package com.onesandzeros.jwt.token.service;
 
+import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.Map;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -12,7 +18,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.onesandzeros.models.KeyData;
 import com.onesandzeros.models.UserInfo;
+import com.onesandzeros.util.EncryptDecryptUtil;
 import com.onesandzeros.util.JsonUtil;
 
 import io.jsonwebtoken.Claims;
@@ -55,18 +63,20 @@ public class JwtTokenBuilder {
 
 		Claims claims = Jwts.claims();
 
-		claims.setSubject(tokenString);
+		try {
+			claims.setSubject(EncryptDecryptUtil.encrypt(tokenString));
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+				| BadPaddingException e) {
+			LOGGER.error("Error in encrypting data");
+		}
 		claims.setIssuedAt(new Date(currentTime));
 		claims.setExpiration(new Date(expiryTime));
 		claims.setIssuer(env.getProperty("jwt.token.issuer"));
+		KeyData keyData = keyService.getOnePrivateKeyRandomly();
 
-		builder.setHeaderParam("kid", keyService.getKeyId()).setClaims(claims).signWith(SignatureAlgorithm.RS256,
-				getSigningKey());
+		builder.setHeaderParam("kid", keyData.getKeyId()).setClaims(claims).signWith(SignatureAlgorithm.RS256,
+				keyData.getKey());
 		return builder.compact();
-	}
-
-	private Key getSigningKey() {
-		return keyService.getPrivateKey();
 	}
 
 }

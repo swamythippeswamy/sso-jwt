@@ -34,7 +34,7 @@ public class SsoServerJwtTokenParser implements JwtTokenParser {
 
 		try {
 			String jwtToken = parseTokenValueFromHeader(jwtHeader);
-			Jws<Claims> claims = Jwts.parser().setSigningKey(getSigningKey()).parseClaimsJws(jwtToken);
+			Jws<Claims> claims = Jwts.parser().setSigningKeyResolver(keyService.getResolver()).parseClaimsJws(jwtToken);
 			LOGGER.info("claims.getBody() : {}", claims.getBody());
 			if (null != claims && null != claims.getBody()) {
 				parserResp.setStatus(JwtTokenParserResponse.SUCCESS);
@@ -56,10 +56,6 @@ public class SsoServerJwtTokenParser implements JwtTokenParser {
 
 		LOGGER.info("JwtTokenParserResponse : {}", parserResp);
 		return parserResp;
-	}
-
-	private Key getSigningKey() {
-		return keyService.getPublicKey();
 	}
 
 	private String parseTokenValueFromHeader(String jwtHeader) {

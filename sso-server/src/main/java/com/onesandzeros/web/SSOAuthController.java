@@ -70,18 +70,6 @@ public class SSOAuthController {
 		return ssoService.activateAccount(request, response, emailId, token);
 	}
 
-	/**
-	 * API used by micro services to fetch the public key
-	 * 
-	 * @return {@link PublicKeyData}
-	 */
-	@RequestMapping("/getPublicKey")
-	public @ResponseBody PublicKeyData getPublicKey() {
-		LOGGER.info("Get Public key api");
-		PublicKeyData data = jwtSigningKeyService.getPublicKeyData();
-		return data;
-	}
-
 	// Testing api
 	@RequestMapping("/accountInfo")
 	@JwtAuthentication

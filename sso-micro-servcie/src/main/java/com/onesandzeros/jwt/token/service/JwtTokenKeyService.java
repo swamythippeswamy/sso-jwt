@@ -1,12 +1,19 @@
 package com.onesandzeros.jwt.token.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -17,9 +24,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.onesandzeros.models.JwtTokensKeyPair;
 import com.onesandzeros.models.PublicKeyData;
+import com.onesandzeros.util.CommonUtil;
+import com.onesandzeros.util.JsonUtil;
 import com.onesandzeros.util.RestServiceUtil;
 
 import io.jsonwebtoken.Claims;
@@ -32,6 +43,11 @@ public class JwtTokenKeyService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenKeyService.class);
 
+	/**
+	 * Contains map of keyId and {@link JwtTokensKeyPair} having (keyId and
+	 * publickKey)
+	 */
+	private Map<String, JwtTokensKeyPair> keyPairMap = new HashMap<>();
 	private Map<String, Key> publicKeys = new HashMap<String, Key>();
 
 	private SigningKeyResolver resolver;
@@ -42,56 +58,42 @@ public class JwtTokenKeyService {
 	@Autowired
 	RestServiceUtil restUtil;
 
-	public boolean addPublicKey(PublicKeyData publicKeyData) {
-
-		boolean addStatus = true;
-		String encodedPublicKey = publicKeyData.getEncodedPublicKey();
-		PublicKey publicKey = null;
-		try {
-			publicKey = getDecodedPublicKey(encodedPublicKey);
-		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			LOGGER.error("Error in decoding the publicKey", e);
-		}
-
-		if (null != publicKey) {
-			publicKeys.put(publicKeyData.getKeyId(), publicKey);
-			LOGGER.info("Successfully added the public key");
-		}
-
-		return addStatus;
-	}
-
+	@SuppressWarnings("unchecked")
 	@PostConstruct
-	public void refreshPublicKey() {
+	public void readKeyData() throws ClassNotFoundException, IOException {
 
-		LOGGER.info("Refreshing the public key by fetching from sso server");
-		String ssoBaseServiceUrl = env.getProperty("sso.server.get.public.key.url");
-		if (StringUtils.isEmpty(ssoBaseServiceUrl)) {
-			LOGGER.info("Public key is not updated, since sso.server.get.public.key.url not found in props");
-			return;
-		}
+		LOGGER.info("Reading publicKeys from serialized key file: start");
 
-		PublicKeyData publicKeyData = null;
-		try {
-			publicKeyData = restUtil.getRequest(ssoBaseServiceUrl, PublicKeyData.class);
-			addPublicKey(publicKeyData);
-		} catch (Exception e) {
-			LOGGER.error("Error in getting and updating the public key from sso base server", e);
+		InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("client_key.txt");
+
+		String keyData = CommonUtil.readDataFromInputStream(inStream);
+
+		List<JwtTokensKeyPair> keysList = new ArrayList<>(1);
+		keysList = JsonUtil.deserializeListData(keyData, JwtTokensKeyPair.class);
+
+		if (!CollectionUtils.isEmpty(keysList)) {
+			for (JwtTokensKeyPair keyPair : keysList) {
+				keyPairMap.put(keyPair.getKeyId(), keyPair);
+				publicKeys.put(keyPair.getKeyId(), getDecodedPublicKey(keyPair.getPublicKey()));
+			}
 		}
+		LOGGER.info("Reading publicKeys from serialized key file: end");
 	}
 
 	public Key getPublicKey(String keyId) {
 		return publicKeys.get(keyId);
 	}
 
-	private PublicKey getDecodedPublicKey(String encodedPublicKey)
-			throws InvalidKeySpecException, NoSuchAlgorithmException {
-		PublicKey key = null;
-		byte[] decoded = Base64Utils.decodeFromString(encodedPublicKey);
+	private Key getDecodedPublicKey(String publicKeyStr) {
+		byte[] decoded = Base64Utils.decodeFromString(publicKeyStr);
+		Key publicKey = null;
+		try {
+			publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decoded));
+		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+			LOGGER.error("Error in decoding privateKey", e);
+		}
 
-		key = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decoded));
-
-		return key;
+		return publicKey;
 	}
 
 	public class SigninKeyResolverAdapter implements SigningKeyResolver {
@@ -106,16 +108,6 @@ public class JwtTokenKeyService {
 			}
 			Key key = publicKeys.get(keyId);
 
-			// Refresh the public key if key not found for the keyId
-			if (key == null) {
-				refreshPublicKey();
-				key = publicKeys.get(keyId);
-
-				if (key == null) {
-					LOGGER.error("No key found for the keyId : {} and claims : {}", keyId, claims);
-					throw new JwtException("No key found for the keyId : " + keyId + " and claims: " + claims);
-				}
-			}
 			return key;
 		}
 

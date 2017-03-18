@@ -21,6 +21,7 @@ import com.onesandzeros.models.BaseResponse;
 import com.onesandzeros.models.JwtTokenParserResponse;
 import com.onesandzeros.models.SessionData;
 import com.onesandzeros.models.UserInfo;
+import com.onesandzeros.util.EncryptDecryptUtil;
 import com.onesandzeros.util.JsonUtil;
 
 import io.jsonwebtoken.Claims;
@@ -69,6 +70,7 @@ public class JwtAuthAspect {
 
 		JwtTokenParserResponse tokenParResp = null;
 		Claims tokenClaims = null;
+
 		try {
 			tokenParResp = tokenParser.getClaimsFromJwtToken(jwtAuthHeaderVal);
 
@@ -76,7 +78,7 @@ public class JwtAuthAspect {
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 				return new BaseResponse<String>(HttpStatus.UNAUTHORIZED.value(), tokenParResp.getMessage());
 			}
-			
+
 			tokenClaims = tokenParResp.getClaims();
 			LOGGER.info("JWT token decoded userInfo : {}", tokenClaims.getSubject());
 			if (null == tokenClaims.getSubject()) {
@@ -94,7 +96,9 @@ public class JwtAuthAspect {
 		// Session information will be added to ThreadLocal only of token is
 		// verified
 		LOGGER.info("Before initializing sessin data : {}", SessionData.getUserInfo());
-		UserInfo userInfo = JsonUtil.deserialize(tokenClaims.getSubject(), UserInfo.class);
+		String encryptedUserData = tokenClaims.getSubject();
+		String decryptedUserData = EncryptDecryptUtil.decrypt(encryptedUserData);
+		UserInfo userInfo = JsonUtil.deserialize(decryptedUserData, UserInfo.class);
 
 		SessionData.setUserInfo(userInfo);
 
