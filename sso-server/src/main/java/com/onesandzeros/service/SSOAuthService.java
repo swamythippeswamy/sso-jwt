@@ -17,4 +17,7 @@ public interface SSOAuthService {
 
 	BaseResponse<String> signup(HttpServletRequest request, HttpServletResponse response, LoginPayload loginPayload)
 			throws ServiceException;
+
+	String activateAccount(HttpServletRequest request, HttpServletResponse response, String email, String token)
+			throws ServiceException;
 }

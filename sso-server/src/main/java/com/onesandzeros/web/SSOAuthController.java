@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,6 +51,23 @@ public class SSOAuthController {
 			HttpServletResponse response) throws ServiceException {
 		LOGGER.info("signup api : {}", loginPayload);
 		return ssoService.signup(request, response, loginPayload);
+	}
+
+	@RequestMapping("/logout")
+	public @ResponseBody BaseResponse<String> logout(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
+			HttpServletResponse response) throws ServiceException {
+		LOGGER.info("signup api : {}", loginPayload);
+		return ssoService.signup(request, response, loginPayload);
+	}
+
+	@RequestMapping("/verifyAccount")
+	public @ResponseBody String verifyAccount(@RequestParam(name = "email", required = true) String emailId,
+			@RequestParam(name = "token", required = true) String token, HttpServletRequest request,
+			HttpServletResponse response) throws ServiceException {
+
+		LOGGER.info("Activation api, params - email : {}, toekn : {}", emailId, token);
+
+		return ssoService.activateAccount(request, response, emailId, token);
 	}
 
 	/**

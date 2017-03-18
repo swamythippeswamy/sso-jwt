@@ -12,4 +12,5 @@ public interface AppConstants {
 
 	String MAIL_ACTIVATION_TEMPLATE = "mail.activation.template";
 
+	String ACCOUNT_ACTIVATION_URL = "account.activation.url";
 }

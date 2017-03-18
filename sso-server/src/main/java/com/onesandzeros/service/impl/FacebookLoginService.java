@@ -15,10 +15,10 @@ import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.model.register.LoginServiceResponse;
 import com.onesandzeros.model.register.Status;
+import com.onesandzeros.model.social.FaceBookAuthResponse;
 import com.onesandzeros.models.AccountType;
 import com.onesandzeros.models.UserInfo;
 import com.onesandzeros.social.auth.service.FacebookAuthentication;
-import com.onesandzeros.social.model.FaceBookAuthResponse;
 
 @Component
 public class FacebookLoginService {

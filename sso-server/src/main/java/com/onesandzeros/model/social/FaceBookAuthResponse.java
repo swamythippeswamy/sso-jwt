@@ -1,4 +1,4 @@
-package com.onesandzeros.social.model;
+package com.onesandzeros.model.social;
 
 public class FaceBookAuthResponse {
 

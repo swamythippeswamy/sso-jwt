@@ -23,9 +23,6 @@ public class SSOAuthBootAppMain {
 		SpringApplication.run(SSOAuthBootAppMain.class, args);
 	}
 
-	/*
-	 * Velocity configuration.
-	 */
 	@Bean
 	public VelocityEngine getVelocityEngine() throws VelocityException, IOException {
 

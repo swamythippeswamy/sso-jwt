@@ -78,9 +78,16 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 	@Override
 	public BaseResponse<String> signup(HttpServletRequest request, HttpServletResponse response,
 			LoginPayload loginPayload) throws ServiceException {
-		LOGGER.info("signup : {}", loginPayload);
 		LoginServiceResponse<UserInfo> loginResp = emailLoginService.signUp(loginPayload);
 		return new BaseResponse<String>(loginResp.getStatus().getCode(), loginResp.getStatus().getMessage());
+	}
+
+	@Override
+	public String activateAccount(HttpServletRequest request, HttpServletResponse response, String email, String token)
+			throws ServiceException {
+
+		String message = emailLoginService.activateEmailAccount(email, token);
+		return message;
 	}
 
 	@Override

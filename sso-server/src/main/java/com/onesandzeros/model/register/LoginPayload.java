@@ -6,7 +6,7 @@ import com.onesandzeros.models.AccountType;
 
 /**
  * 
- * Model used as Request Payload for login and register
+ * Model used as Request Payload for login and signup
  * 
  * @author swamy
  *
@@ -19,6 +19,10 @@ public class LoginPayload implements Serializable {
 	private String phone;
 	private String password;
 	private AccountType accountType;
+
+	/**
+	 * FB/Google+ authentication token
+	 */
 	private String token;
 
 	public String getName() {

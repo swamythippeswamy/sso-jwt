@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.onesandzeros.social.model.FaceBookAuthResponse;
+import com.onesandzeros.model.social.FaceBookAuthResponse;
 
 import facebook4j.Facebook;
 import facebook4j.FacebookException;

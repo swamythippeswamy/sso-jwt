@@ -16,6 +16,12 @@ import org.springframework.stereotype.Service;
 
 import com.onesandzeros.AppConstants;
 
+/**
+ * Module for sending simple mail
+ * 
+ * @author swamy
+ *
+ */
 @Service
 public class MailClient {
 
@@ -27,7 +33,6 @@ public class MailClient {
 	@Autowired
 	private Environment env;
 
-	// TODO : (Move it to a seperate thread)
 	public void sendMail(String toMailId, String body) throws MessagingException {
 		LOGGER.info("Sending mail to emailId : {}", toMailId);
 		MimeMessage mimeMsg = new MimeMessage(sessionUtil.getSession());
@@ -38,7 +43,6 @@ public class MailClient {
 		mimeMsg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toMailId, false));
 
 		Transport.send(mimeMsg);
-
 	}
 
 	private void setDefaultProps(MimeMessage msg) throws MessagingException {
