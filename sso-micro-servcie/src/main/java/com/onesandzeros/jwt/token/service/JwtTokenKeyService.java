@@ -1,4 +1,4 @@
-package com.onesandzeros.jwttoken.service;
+package com.onesandzeros.jwt.token.service;
 
 import java.security.Key;
 import java.security.KeyFactory;
@@ -28,9 +28,9 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SigningKeyResolver;
 
 @Service
-public class JwtSecurityService {
+public class JwtTokenKeyService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(JwtSecurityService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenKeyService.class);
 
 	private Map<String, Key> publicKeys = new HashMap<String, Key>();
 
@@ -64,6 +64,7 @@ public class JwtSecurityService {
 	@PostConstruct
 	public void refreshPublicKey() {
 
+		LOGGER.info("Refreshing the public key by fetching from sso server");
 		String ssoBaseServiceUrl = env.getProperty("sso.server.get.public.key.url");
 		if (StringUtils.isEmpty(ssoBaseServiceUrl)) {
 			LOGGER.info("Public key is not updated, since sso.server.get.public.key.url not found in props");

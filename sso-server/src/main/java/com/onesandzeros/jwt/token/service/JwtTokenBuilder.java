@@ -1,6 +1,7 @@
-package com.onesandzeros.jwttoken.service;
+package com.onesandzeros.jwt.token.service;
 
 import java.security.Key;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.onesandzeros.models.UserInfo;
 import com.onesandzeros.util.JsonUtil;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -27,7 +29,7 @@ public class JwtTokenBuilder {
 	Environment env;
 
 	@Autowired
-	JwtSigningKeyService keyService;
+	JwtTokenKeyService keyService;
 
 	public void addAuthToken(HttpServletResponse response, UserInfo userInfo) {
 
@@ -48,7 +50,17 @@ public class JwtTokenBuilder {
 	private String createAuthToken(String tokenString) {
 		JwtBuilder builder = Jwts.builder();
 
-		builder.setHeaderParam("kid", keyService.getKeyId()).setSubject(tokenString).signWith(SignatureAlgorithm.RS256,
+		long currentTime = System.currentTimeMillis();
+		long expiryTime = System.currentTimeMillis() + Long.parseLong(env.getProperty("jwt.token.validity.time"));
+
+		Claims claims = Jwts.claims();
+
+		claims.setSubject(tokenString);
+		claims.setIssuedAt(new Date(currentTime));
+		claims.setExpiration(new Date(expiryTime));
+		claims.setIssuer(env.getProperty("jwt.token.issuer"));
+
+		builder.setHeaderParam("kid", keyService.getKeyId()).setClaims(claims).signWith(SignatureAlgorithm.RS256,
 				getSigningKey());
 		return builder.compact();
 	}

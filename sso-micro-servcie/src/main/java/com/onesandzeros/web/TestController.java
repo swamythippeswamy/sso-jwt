@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.onesandzeros.aspects.JwtAuthentication;
-import com.onesandzeros.jwttoken.service.JwtSecurityService;
+import com.onesandzeros.jwt.token.service.JwtTokenKeyService;
 import com.onesandzeros.models.BaseResponse;
 import com.onesandzeros.models.PublicKeyData;
 import com.onesandzeros.models.SessionData;
@@ -22,7 +22,7 @@ public class TestController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestController.class);
 
 	@Autowired
-	private JwtSecurityService securityService;
+	private JwtTokenKeyService securityService;
 
 	@RequestMapping(value = "/addPublicKey", method = RequestMethod.POST)
 	public boolean addPublicKeys(@RequestBody PublicKeyData publicKeyData) {

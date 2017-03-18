@@ -1,6 +1,13 @@
 package com.onesandzeros.util;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
+
+import com.onesandzeros.models.BaseResponse;
+
+import io.jsonwebtoken.Claims;
 
 /**
  * @author swamy
@@ -38,5 +45,6 @@ public class CommonUtil {
 		}
 		return validPwd;
 	}
+
 
 }

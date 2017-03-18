@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.onesandzeros.aspects.JwtAuthentication;
 import com.onesandzeros.exceptions.ServiceException;
-import com.onesandzeros.jwttoken.service.JwtSigningKeyService;
+import com.onesandzeros.jwt.token.service.JwtTokenKeyService;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.models.BaseResponse;
@@ -31,7 +31,7 @@ public class SSOAuthController {
 	SSOAuthService ssoService;
 
 	@Autowired
-	JwtSigningKeyService jwtSigningKeyService;
+	JwtTokenKeyService jwtSigningKeyService;
 
 	@RequestMapping("/")
 	public @ResponseBody String home() {

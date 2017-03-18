@@ -1,4 +1,4 @@
-package com.onesandzeros.jwttoken.service;
+package com.onesandzeros.jwt.token.service;
 
 import java.security.Key;
 import java.security.KeyPair;
@@ -22,9 +22,9 @@ import com.onesandzeros.util.RestServiceUtil;
 import io.jsonwebtoken.impl.crypto.RsaProvider;
 
 @Component
-public class JwtSigningKeyService {
+public class JwtTokenKeyService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(JwtSigningKeyService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenKeyService.class);
 
 	private KeyPair keyPair;
 	private String keyId;

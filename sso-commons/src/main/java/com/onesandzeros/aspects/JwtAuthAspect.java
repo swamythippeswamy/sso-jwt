@@ -11,18 +11,23 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import com.onesandzeros.jwttoken.service.JwtTokenParser;
+import com.onesandzeros.jwt.token.service.JwtTokenParser;
 import com.onesandzeros.models.BaseResponse;
+import com.onesandzeros.models.JwtTokenParserResponse;
 import com.onesandzeros.models.SessionData;
 import com.onesandzeros.models.UserInfo;
 import com.onesandzeros.util.JsonUtil;
 
+import io.jsonwebtoken.Claims;
+
 /**
- * Aspect implementation for annotation {@link JwtAuthentication}
+ * Aspect implementation for annotation {@link JwtAuthentication}. This will be
+ * used by both sso-client and sso-server
  * 
  * @author swamy
  *
@@ -37,6 +42,7 @@ public class JwtAuthAspect {
 	Environment env;
 
 	@Autowired
+	@Qualifier("jwtTokenParser")
 	private JwtTokenParser tokenParser;
 
 	@Autowired
@@ -61,15 +67,24 @@ public class JwtAuthAspect {
 			return new BaseResponse<String>(HttpStatus.UNAUTHORIZED.value(), "Auth header is missing");
 		}
 
-		String userInfoStr = null;
+		JwtTokenParserResponse tokenParResp = null;
+		Claims tokenClaims = null;
 		try {
-			userInfoStr = tokenParser.getAuthToken(jwtAuthHeaderVal);
-			LOGGER.info("JWT token decoded userName : {}", userInfoStr);
-			if (null == userInfoStr) {
+			tokenParResp = tokenParser.getClaimsFromJwtToken(jwtAuthHeaderVal);
+
+			if (tokenParResp.getStatus() == JwtTokenParserResponse.FAILURE) {
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				return new BaseResponse<String>(HttpStatus.UNAUTHORIZED.value(), tokenParResp.getMessage());
+			}
+			
+			tokenClaims = tokenParResp.getClaims();
+			LOGGER.info("JWT token decoded userInfo : {}", tokenClaims.getSubject());
+			if (null == tokenClaims.getSubject()) {
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 				return new BaseResponse<String>(HttpStatus.UNAUTHORIZED.value(),
-						"Invalid jwt token, Authentication failure");
+						"Invalid jwt token, User Information not present in token");
 			}
+
 		} catch (Exception e) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			return new BaseResponse<String>(HttpStatus.UNAUTHORIZED.value(),
@@ -79,7 +94,7 @@ public class JwtAuthAspect {
 		// Session information will be added to ThreadLocal only of token is
 		// verified
 		LOGGER.info("Before initializing sessin data : {}", SessionData.getUserInfo());
-		UserInfo userInfo = JsonUtil.deserialize(userInfoStr, UserInfo.class);
+		UserInfo userInfo = JsonUtil.deserialize(tokenClaims.getSubject(), UserInfo.class);
 
 		SessionData.setUserInfo(userInfo);
 

@@ -3,6 +3,8 @@ package com.onesandzeros.service.impl;
 import java.sql.Timestamp;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,14 @@ import com.onesandzeros.service.RegistrationTokenService;
 
 @Service
 public class RegistrationTokenServiceImpl implements RegistrationTokenService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegistrationTokenServiceImpl.class);
+
+	/**
+	 * In milliseconds
+	 */
+	private static final Long tokenExpirationTime = 60 * 60 * 1000l;
+
 	@Autowired
 	private RegistrationVerificationDao regVerDao;
 
@@ -28,12 +38,16 @@ public class RegistrationTokenServiceImpl implements RegistrationTokenService {
 
 	@Override
 	public boolean validateToken(Long userId, String token) {
+
+		LOGGER.debug("Validating token : {}, for  userId : {}", token, userId);
 		boolean valid = false;
 		RegistrationTokenEntity regTokEnt = regVerDao.findByUserIdAndHash(userId, token);
 
 		long currentTime = System.currentTimeMillis();
 		if (null != regTokEnt) {
-			if (regTokEnt.getCreateTime().getTime() - currentTime > 0) {
+			long timeDiff = currentTime - regTokEnt.getCreateTime().getTime();
+			LOGGER.info("Time diff : {}", timeDiff);
+			if (timeDiff > 0 && timeDiff < tokenExpirationTime) {
 				valid = true;
 			}
 		}

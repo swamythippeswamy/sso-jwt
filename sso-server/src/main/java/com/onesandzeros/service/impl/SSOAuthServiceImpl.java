@@ -11,13 +11,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.onesandzeros.dao.UserAccountDao;
 import com.onesandzeros.exceptions.DaoException;
 import com.onesandzeros.exceptions.ServiceException;
-import com.onesandzeros.jwttoken.service.JwtTokenBuilder;
+import com.onesandzeros.jwt.token.service.JwtTokenBuilder;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.model.register.LoginServiceResponse;
@@ -51,6 +52,11 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 		BaseResponse<String> resp = new BaseResponse<>();
 		LoginServiceResponse<UserInfo> loginServiceResp = null;
 
+		if (loginPayload.getAccountType() == null) {
+			resp.setCode(HttpStatus.BAD_REQUEST.value());
+			resp.setData("Account type is required in the login request");
+			return resp;
+		}
 		// TODO: (Swamy) Use factory pattern to get which login service to use
 		if (loginPayload.getAccountType() == EMAIL) {
 			loginServiceResp = emailLoginService.emailLogin(loginPayload);
