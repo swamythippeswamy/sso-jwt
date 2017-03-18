@@ -11,6 +11,12 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+/**
+ * Model for storing and tracking the tokens added in the email activation link
+ * 
+ * @author ubuntu
+ *
+ */
 @Entity
 @Table(name = "user_registration_token")
 public class RegistrationTokenEntity {

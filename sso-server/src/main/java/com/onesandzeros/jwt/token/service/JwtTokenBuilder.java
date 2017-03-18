@@ -1,14 +1,7 @@
 package com.onesandzeros.jwt.token.service;
 
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.Map;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -28,6 +21,13 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+/**
+ * This is used for building the jwt token if login is successful, it adds the
+ * generated jwt token to {@link HttpServletResponse}
+ * 
+ * @author swamy
+ *
+ */
 @Component
 public class JwtTokenBuilder {
 
@@ -62,13 +62,7 @@ public class JwtTokenBuilder {
 		long expiryTime = System.currentTimeMillis() + Long.parseLong(env.getProperty("jwt.token.validity.time"));
 
 		Claims claims = Jwts.claims();
-
-		try {
-			claims.setSubject(EncryptDecryptUtil.encrypt(tokenString));
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException e) {
-			LOGGER.error("Error in encrypting data");
-		}
+		claims.setSubject(EncryptDecryptUtil.encrypt(tokenString));
 		claims.setIssuedAt(new Date(currentTime));
 		claims.setExpiration(new Date(expiryTime));
 		claims.setIssuer(env.getProperty("jwt.token.issuer"));

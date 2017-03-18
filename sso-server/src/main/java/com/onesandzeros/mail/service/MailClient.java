@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import com.onesandzeros.AppConstants;
 
 /**
- * Module for sending simple mail
+ * Module for sending a simple mail
  * 
  * @author swamy
  *

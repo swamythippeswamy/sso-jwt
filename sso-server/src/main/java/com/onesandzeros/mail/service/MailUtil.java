@@ -6,7 +6,6 @@ import static com.onesandzeros.AppConstants.MAIL_SMTP_HOST;
 import static com.onesandzeros.AppConstants.MAIL_SMTP_PORT;
 import static com.onesandzeros.AppConstants.MAIL_SMTP_STARTTLS_ENABLE;
 import static com.onesandzeros.AppConstants.MAIL_USERNAME;
-import static com.onesandzeros.AppConstants.MAIL_ACTIVATION_TEMPLATE;
 
 import java.util.Properties;
 

@@ -25,7 +25,6 @@ public class SSOAuthBootAppMain {
 
 	@Bean
 	public VelocityEngine getVelocityEngine() throws VelocityException, IOException {
-
 		Properties props = new Properties();
 		props.put("resource.loader", "class");
 		props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");

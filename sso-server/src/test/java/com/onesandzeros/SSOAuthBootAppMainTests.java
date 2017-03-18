@@ -4,7 +4,7 @@ package com.onesandzeros;
 //@SpringBootTest
 public class SSOAuthBootAppMainTests {
 
-//	@Test
+	// @Test
 	public void contextLoads() {
 	}
 

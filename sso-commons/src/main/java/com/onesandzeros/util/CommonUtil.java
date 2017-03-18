@@ -5,14 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
-
-import com.onesandzeros.models.BaseResponse;
-
-import io.jsonwebtoken.Claims;
 
 /**
  * @author swamy

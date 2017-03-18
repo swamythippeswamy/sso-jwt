@@ -8,7 +8,6 @@ import java.text.MessageFormat;
 
 import javax.mail.MessagingException;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -21,12 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.onesandzeros.dao.RegistrationVerificationDao;
 import com.onesandzeros.dao.UserAccountDao;
 import com.onesandzeros.exceptions.DaoException;
 import com.onesandzeros.exceptions.ServiceException;
 import com.onesandzeros.mail.service.MailClient;
-import com.onesandzeros.mail.service.MailUtil;
 import com.onesandzeros.model.persistance.RegistrationTokenEntity;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
@@ -36,6 +33,7 @@ import com.onesandzeros.models.AccountType;
 import com.onesandzeros.models.UserInfo;
 import com.onesandzeros.service.RegistrationTokenService;
 import com.onesandzeros.util.CommonUtil;
+import com.onesandzeros.util.EncryptDecryptUtil;
 
 @Component
 public class EmailLoginService {
@@ -76,15 +74,17 @@ public class EmailLoginService {
 		if (null == userAccEnt) {
 			loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Login id is not regiesterd"));
 			return loginResp;
+		}
+		if (!userAccEnt.isActive()) {
+			loginResp.setStatus(new Status(HttpStatus.BAD_REQUEST.value(), "Login id/Password is incorrect"));
 		} else {
-			if (!userAccEnt.isActive()) {
-				loginResp.setStatus(
-						new Status(HttpStatus.BAD_REQUEST.value(), "Login id is not activated, do signup again"));
-			} else {
-				userInfo = new UserInfo(userAccEnt.getName(), userAccEnt.getEmail());
-				loginResp.setStatus(new Status(HttpStatus.OK.value(), "Login successful"));
-				loginResp.setData(userInfo);
+
+			if (verifyPassword(loginPayload, userAccEnt)) {
+
 			}
+			userInfo = new UserInfo(userAccEnt.getName(), userAccEnt.getEmail());
+			loginResp.setStatus(new Status(HttpStatus.OK.value(), "Login successful"));
+			loginResp.setData(userInfo);
 		}
 
 		return loginResp;
@@ -178,7 +178,9 @@ public class EmailLoginService {
 		accountEntity.setAccountType(AccountType.EMAIL);
 		accountEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		accountEntity.setEmail(loginPayload.getEmail());
-		accountEntity.setPassword(loginPayload.getPassword());
+
+		String encryptedPwd = EncryptDecryptUtil.encrypt(loginPayload.getPassword());
+		accountEntity.setPassword(encryptedPwd);
 
 		accountEntity.setName(loginPayload.getName());
 		accountEntity.setActive(false);
@@ -220,5 +222,19 @@ public class EmailLoginService {
 			LOGGER.error("Error in finding account by emailId, e");
 		}
 		return emailIdRegistered;
+	}
+
+	private boolean verifyPassword(LoginPayload loginPayload, UserAccountEntity userAccEnt) {
+
+		boolean valid = false;
+		String userEntPwd = loginPayload.getPassword();
+
+		String encryptedPwd = userAccEnt.getPassword();
+		String decryptedPwd = EncryptDecryptUtil.decrypt(encryptedPwd);
+
+		if (userEntPwd.equals(decryptedPwd)) {
+			valid = true;
+		}
+		return valid;
 	}
 }

@@ -19,9 +19,13 @@ import com.onesandzeros.jwt.token.service.JwtTokenKeyService;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.models.BaseResponse;
-import com.onesandzeros.models.PublicKeyData;
 import com.onesandzeros.service.SSOAuthService;
 
+/**
+ * 
+ * @author swamy
+ *
+ */
 @RestController
 public class SSOAuthController {
 
@@ -53,6 +57,7 @@ public class SSOAuthController {
 		return ssoService.signup(request, response, loginPayload);
 	}
 
+	// TODO: (Implement logout functionality)
 	@RequestMapping("/logout")
 	public @ResponseBody BaseResponse<String> logout(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
 			HttpServletResponse response) throws ServiceException {

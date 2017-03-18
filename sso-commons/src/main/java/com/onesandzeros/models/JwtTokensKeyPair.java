@@ -1,7 +1,6 @@
 package com.onesandzeros.models;
 
 import java.io.Serializable;
-import java.security.Key;
 
 public class JwtTokensKeyPair implements Serializable {
 	private static final long serialVersionUID = 5866151861913736065L;

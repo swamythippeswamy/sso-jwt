@@ -2,13 +2,11 @@ package com.onesandzeros.jwt.token.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +24,6 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.onesandzeros.jwt.token.service.JwtTokenKeyService.SigninKeyResolverAdapter;
 import com.onesandzeros.models.JwtTokensKeyPair;
 import com.onesandzeros.models.KeyData;
 import com.onesandzeros.util.CommonUtil;
@@ -38,6 +35,21 @@ import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SigningKeyResolver;
 
+/**
+ * Ones spring beans are loaded completely this class reads the server_key.txt
+ * file and create data as {@link JwtTokensKeyPair} for keyId and public,
+ * private key pairs.
+ * 
+ * The keys in server_key.txt is Base64 encoded.
+ * 
+ * These set of keys will be shared in sso-client service also.
+ * 
+ * Randomly one key is selected from the set of keys and particular key id is
+ * added to jwt header
+ * 
+ * @author swamy
+ *
+ */
 @Component
 public class JwtTokenKeyService {
 

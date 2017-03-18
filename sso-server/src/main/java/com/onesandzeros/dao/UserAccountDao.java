@@ -7,6 +7,13 @@ import com.onesandzeros.exceptions.DaoException;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.models.AccountType;
 
+/**
+ * 
+ * Repository for {@link UserAccountEntity}
+ * 
+ * @author swamy
+ *
+ */
 @Repository
 public interface UserAccountDao extends CrudRepository<UserAccountEntity, Long> {
 

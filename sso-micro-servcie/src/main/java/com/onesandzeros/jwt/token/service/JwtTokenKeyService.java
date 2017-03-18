@@ -1,14 +1,10 @@
 package com.onesandzeros.jwt.token.service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
@@ -28,7 +24,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.onesandzeros.models.JwtTokensKeyPair;
-import com.onesandzeros.models.PublicKeyData;
 import com.onesandzeros.util.CommonUtil;
 import com.onesandzeros.util.JsonUtil;
 import com.onesandzeros.util.RestServiceUtil;

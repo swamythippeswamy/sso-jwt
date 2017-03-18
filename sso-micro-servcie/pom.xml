@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.4.5.RELEASE</version>
+		<version>1.4.0.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
@@ -26,13 +26,6 @@
 
 	<dependencies>
 
-		<!-- common sources for sso-services -->
-		<dependency>
-			<groupId>com.onesandzeros</groupId>
-			<artifactId>sso-commons</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -42,6 +35,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.onesandzeros</groupId>
+			<artifactId>sso-commons</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

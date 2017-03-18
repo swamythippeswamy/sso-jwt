@@ -16,6 +16,12 @@ import org.hibernate.annotations.GenericGenerator;
 
 import com.onesandzeros.models.AccountType;
 
+/**
+ * Entity for storing the complete user account information
+ * 
+ * @author swamy
+ *
+ */
 @Entity
 @Table(name = "user_account")
 public class UserAccountEntity implements Serializable {

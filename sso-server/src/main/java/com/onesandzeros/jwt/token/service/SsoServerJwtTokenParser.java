@@ -1,7 +1,5 @@
 package com.onesandzeros.jwt.token.service;
 
-import java.security.Key;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +15,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 
+/**
+ * 
+ * Parsing the Jwt Header(Authentication header), verifying the token with
+ * signature and parsing claims in the token
+ * 
+ * @author swamy
+ *
+ */
 @Component("jwtTokenParser")
 public class SsoServerJwtTokenParser implements JwtTokenParser {
 

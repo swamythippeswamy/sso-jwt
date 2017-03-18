@@ -14,7 +14,8 @@ import facebook4j.auth.AccessToken;
 
 /**
  * 
- * Authenticates the Facebook token sent by client
+ * Authenticates the Facebook token sent by client by contacting the facebook
+ * rest api's
  * 
  * @author Swamy
  *
