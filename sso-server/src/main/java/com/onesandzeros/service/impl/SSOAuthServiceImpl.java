@@ -57,26 +57,34 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 			resp.setData("Account type is required in the login request");
 			return resp;
 		}
-		// TODO: (Swamy) Use factory pattern to get which login service to use
-		if (loginPayload.getAccountType() == EMAIL) {
-			loginServiceResp = emailLoginService.emailLogin(loginPayload);
-		} else if (loginPayload.getAccountType() == FACEBOOK) {
-			loginServiceResp = facebookLoginService.login(loginPayload);
 
-		} else if (loginPayload.getAccountType() == GOOGLE) {
+		try {
 
-		} else if (loginPayload.getAccountType() == PHONE) {
+			// TODO: (Swamy) Use factory pattern to get which login service to
+			// use
+			if (loginPayload.getAccountType() == EMAIL) {
+				loginServiceResp = emailLoginService.emailLogin(loginPayload);
+			} else if (loginPayload.getAccountType() == FACEBOOK) {
+				loginServiceResp = facebookLoginService.login(loginPayload);
 
-		}
-		LOGGER.info("loginServiceResp : {}", loginServiceResp);
+			} else if (loginPayload.getAccountType() == GOOGLE) {
 
-		resp.setCode(loginServiceResp.getStatus().getCode());
-		resp.setData(loginServiceResp.getStatus().getMessage());
+			} else if (loginPayload.getAccountType() == PHONE) {
 
-		if (null != loginServiceResp.getData()) {
-			tokenBuilder.addAuthToken(response, loginServiceResp.getData());
-		} else {
-			LOGGER.error("Auth token not generated, since userinfo not available in loginServiceResponse");
+			}
+			LOGGER.info("loginServiceResp : {}", loginServiceResp);
+
+			resp.setCode(loginServiceResp.getStatus().getCode());
+			resp.setData(loginServiceResp.getStatus().getMessage());
+
+			if (null != loginServiceResp.getData()) {
+				tokenBuilder.addAuthToken(response, loginServiceResp.getData());
+			} else {
+				LOGGER.error("Auth token not generated, since userinfo not available in loginServiceResponse");
+			}
+		} catch (ServiceException e) {
+			resp.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			resp.setData(e.getMessage());
 		}
 		return resp;
 	}
@@ -94,6 +102,12 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 
 		String message = emailLoginService.activateEmailAccount(email, token);
 		return message;
+	}
+
+	// Revoke jwt token
+	@Override
+	public BaseResponse<String> logout(HttpServletRequest request, HttpServletResponse response) {
+		return new BaseResponse<>();
 	}
 
 	@Override

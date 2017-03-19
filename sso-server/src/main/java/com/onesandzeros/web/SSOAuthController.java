@@ -37,11 +37,6 @@ public class SSOAuthController {
 	@Autowired
 	JwtTokenKeyService jwtSigningKeyService;
 
-	@RequestMapping("/")
-	public @ResponseBody String home() {
-		return "Hello World!";
-	}
-
 	@RequestMapping("/login")
 	public @ResponseBody BaseResponse<String> login(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
 			HttpServletResponse response) throws ServiceException {
@@ -62,7 +57,7 @@ public class SSOAuthController {
 	public @ResponseBody BaseResponse<String> logout(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
 			HttpServletResponse response) throws ServiceException {
 		LOGGER.info("signup api : {}", loginPayload);
-		return ssoService.signup(request, response, loginPayload);
+		return ssoService.logout(request, response);
 	}
 
 	@RequestMapping("/verifyAccount")

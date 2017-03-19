@@ -20,4 +20,6 @@ public interface SSOAuthService {
 
 	String activateAccount(HttpServletRequest request, HttpServletResponse response, String email, String token)
 			throws ServiceException;
+
+	BaseResponse<String> logout(HttpServletRequest request, HttpServletResponse response);
 }

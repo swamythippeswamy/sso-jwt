@@ -62,7 +62,6 @@ public class EmailLoginService {
 		LoginServiceResponse<UserInfo> loginResp = new LoginServiceResponse<>();
 		UserAccountEntity userAccEnt;
 
-		// TODO: Validate password
 		try {
 			userAccEnt = userActDao.findByEmail(loginPayload.getEmail());
 		} catch (DaoException e) {
@@ -72,15 +71,16 @@ public class EmailLoginService {
 		}
 
 		if (null == userAccEnt) {
-			loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Login id is not regiesterd"));
+			loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Login id/Password is incorrect"));
 			return loginResp;
 		}
 		if (!userAccEnt.isActive()) {
-			loginResp.setStatus(new Status(HttpStatus.BAD_REQUEST.value(), "Login id/Password is incorrect"));
+			loginResp.setStatus(new Status(HttpStatus.BAD_REQUEST.value(), "Login id is not activated"));
 		} else {
 
-			if (verifyPassword(loginPayload, userAccEnt)) {
-
+			if (!verifyPassword(loginPayload, userAccEnt)) {
+				loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Login id/Password is incorrect"));
+				return loginResp;
 			}
 			userInfo = new UserInfo(userAccEnt.getName(), userAccEnt.getEmail());
 			loginResp.setStatus(new Status(HttpStatus.OK.value(), "Login successful"));

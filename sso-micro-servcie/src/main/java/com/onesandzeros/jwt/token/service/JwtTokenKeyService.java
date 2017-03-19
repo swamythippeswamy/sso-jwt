@@ -108,7 +108,6 @@ public class JwtTokenKeyService {
 
 		@Override
 		public Key resolveSigningKey(JwsHeader header, String plaintext) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 	}
