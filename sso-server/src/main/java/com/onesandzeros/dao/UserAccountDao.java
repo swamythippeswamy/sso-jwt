@@ -19,6 +19,9 @@ public interface UserAccountDao extends CrudRepository<UserAccountEntity, Long> 
 
 	UserAccountEntity findByEmail(String email) throws DaoException;
 
+	// TODO (I could not get this. When it is find by facebook user id then why
+	// is account type needed. It is implied that account type is Facebook.
+	// Correct me if I am wrong.)
 	UserAccountEntity findByFacebookUserIdAndAccountType(String fbUserId, AccountType accountType) throws DaoException;
 
 }

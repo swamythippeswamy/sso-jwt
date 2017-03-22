@@ -124,6 +124,9 @@ public class EmailLoginService {
 	public String activateEmailAccount(String email, String token) throws ServiceException {
 		String message = null;
 		try {
+			// TODO (Keep it simple - Query the to be activated table if there
+			// is an invalidated record validate, otherwise fail.Reduce query on
+			// master table
 			UserAccountEntity userActEnt = userActDao.findByEmail(email);
 			if (null == userActEnt) {
 				message = "Email Id is not registered, Invalid emailId";
@@ -230,6 +233,8 @@ public class EmailLoginService {
 		String userEntPwd = loginPayload.getPassword();
 
 		String encryptedPwd = userAccEnt.getPassword();
+		// TODO (Serious issue. Never ever decrypt the password. Encrypt the
+		// incoming password and compare with the stored encrypted password
 		String decryptedPwd = EncryptDecryptUtil.decrypt(encryptedPwd);
 
 		if (userEntPwd.equals(decryptedPwd)) {
