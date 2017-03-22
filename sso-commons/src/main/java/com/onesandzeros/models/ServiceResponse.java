@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class ServiceResponse<T> implements Serializable {
 
+	private static final long serialVersionUID = 8174661666931009996L;
+
 	private int code;
 
 	private T data;

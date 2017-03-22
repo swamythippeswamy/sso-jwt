@@ -8,6 +8,9 @@ package com.onesandzeros.models;
  *
  */
 public class SessionData {
+	// TODO (Why is thread local needed? I mean why single SessionData class and
+	// a static threadlocal. What is the reason for not creating more session
+	// data objects?)
 	private static ThreadLocal<UserInfo> userInfo = new ThreadLocal<UserInfo>();
 
 	public static UserInfo getUserInfo() {

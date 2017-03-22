@@ -2,6 +2,7 @@ package com.onesandzeros.models;
 
 import java.io.Serializable;
 
+//TODO this class is not used!
 public class PublicKeyData implements Serializable {
 
 	private static final long serialVersionUID = -4983952003568512603L;

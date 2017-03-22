@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
  * @author swamy
  */
 @Component
+//TODO (is it really a util?)
 public class RestServiceUtil {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RestServiceUtil.class);
