@@ -49,18 +49,23 @@ public class UserAccountEntity implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private AccountType accountType;
 
+	// TODO (Status is desirable - ACTIVE. SUSPEND. DELTE. TOBEVERIFIED). Other
+	// details of Tobeverified should be in another table (RegistrationTokenEntity)
 	@Column(name = "active")
 	private boolean active;
 
 	@Column(name = "create_time")
 	private Timestamp createTime;
 
+	// TODO (This is not sufficient. Create db/file log entry for each
+	// login)UserId, source IP, status-SUC/FAIL should be logged
 	@Column(name = "last_login_time")
 	private Timestamp lastLoginTime;
 
 	@Column(name = "fb_user_id")
 	private String facebookUserId;
 
+	// Does it mean email verified on?
 	@Column(name = "email_activated_on")
 	private Timestamp emailActivatedOn;
 

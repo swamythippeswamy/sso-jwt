@@ -23,6 +23,9 @@ import org.springframework.util.Base64Utils;
  */
 public class EncryptDecryptUtil {
 
+	// TODO (why is the key hardcoded?). Either make it a service which can self
+	// read the key or let both the methods accept a key.Eitherways, it is
+	// recommended to make it a component
 	private static final String encryptionKey = "0n35uN7z36O5k3y5";
 	private static final Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
 

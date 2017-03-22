@@ -46,6 +46,7 @@ public class JwtTokensKeyPair implements Serializable {
 		this.keyId = keyId;
 	}
 
+	// TODO (string concat)
 	@Override
 	public String toString() {
 		return "JwtTokensKeyPair [privateKey=" + privateKey + ", publicKey=" + publicKey + ", keyId=" + keyId + "]";

@@ -15,6 +15,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 
+//TODO ( This class is 90% same as SsoServerJwtTokenParser except for the way it gets the resolver
 @Component("jwtTokenParser")
 public class SsoClientJwtTokenParser implements JwtTokenParser {
 
