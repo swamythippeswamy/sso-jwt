@@ -1,5 +1,6 @@
 package com.onesandzeros.model.persistance;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
@@ -14,12 +15,14 @@ import org.hibernate.annotations.GenericGenerator;
 /**
  * Model for storing and tracking the tokens added in the email activation link
  * 
- * @author ubuntu
+ * @author swamy
  *
  */
 @Entity
 @Table(name = "user_registration_token")
-public class RegistrationTokenEntity {
+public class RegistrationTokenEntity implements Serializable {
+	private static final long serialVersionUID = 290874030709012600L;
+
 	@Id
 	@GenericGenerator(name = "gen", strategy = "identity")
 	@GeneratedValue(generator = "gen", strategy = GenerationType.IDENTITY)
@@ -30,6 +33,9 @@ public class RegistrationTokenEntity {
 
 	@Column(name = "user_id")
 	private Long userId;
+
+	@Column(name = "email")
+	private String email;
 
 	@Column(name = "create_time")
 	private Timestamp createTime;
@@ -58,6 +64,14 @@ public class RegistrationTokenEntity {
 		this.userId = userId;
 	}
 
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	public Timestamp getCreateTime() {
 		return createTime;
 	}
@@ -68,8 +82,10 @@ public class RegistrationTokenEntity {
 
 	@Override
 	public String toString() {
-		return "RegistrationTokenEntity [id=" + id + ", hash=" + hash + ", userId=" + userId + ", createTime="
-				+ createTime + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("RegistrationTokenEntity [id=").append(id).append(", hash=").append(hash).append(", userId=")
+				.append(userId).append(", email=").append(email).append(", createTime=").append(createTime).append("]");
+		return builder.toString();
 	}
 
 }

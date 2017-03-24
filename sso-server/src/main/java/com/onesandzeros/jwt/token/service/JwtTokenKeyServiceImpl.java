@@ -1,5 +1,7 @@
 package com.onesandzeros.jwt.token.service;
 
+import static com.onesandzeros.AppConstants.SERVER_KEY_FILE_NAME;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Key;
@@ -7,6 +9,7 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,21 +22,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import com.onesandzeros.models.JwtTokensKeyPair;
 import com.onesandzeros.models.KeyData;
 import com.onesandzeros.util.CommonUtil;
 import com.onesandzeros.util.JsonUtil;
-import com.onesandzeros.util.RestServiceUtil;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.SigningKeyResolver;
 
 /**
  * Ones spring beans are loaded completely this class reads the server_key.txt
@@ -50,10 +46,12 @@ import io.jsonwebtoken.SigningKeyResolver;
  * @author swamy
  *
  */
-@Component
-public class JwtTokenKeyService {
+@Service("tokenKeyService")
+public class JwtTokenKeyServiceImpl implements JwtTokenKeyService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenKeyService.class);
+	private static final String KEY_ALGORITHM = "RSA";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenKeyServiceImpl.class);
 
 	private static final Random random = new Random();
 
@@ -66,19 +64,17 @@ public class JwtTokenKeyService {
 	private List<String> keyIds = new ArrayList<>();
 	private Map<String, Key> privateKeyMap = new HashMap<>();
 
-	private SigningKeyResolver resolver;
+	private Map<String, Key> publicKeyMap = new HashMap<>();
 
 	@Autowired
 	Environment env;
-
-	@Autowired
-	RestServiceUtil restUtil;
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	private void readKeyPair() throws ClassNotFoundException, IOException {
 		LOGGER.info("Reading Keys Info from serialized key file : start");
-		InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("server_key.txt");
+		InputStream inStream = this.getClass().getClassLoader()
+				.getResourceAsStream(env.getProperty(SERVER_KEY_FILE_NAME, "server_key.txt"));
 
 		String keyData = CommonUtil.readDataFromInputStream(inStream);
 
@@ -91,8 +87,10 @@ public class JwtTokenKeyService {
 				keyIds.add(keyPair.getKeyId());
 
 				privateKeyMap.put(keyPair.getKeyId(), getDecodedPrivateKey(keyPair.getPrivateKey()));
+				publicKeyMap.put(keyPair.getKeyId(), getDecodedPublicKey(keyPair.getPublicKey()));
 			}
 		}
+		LOGGER.info("Total keys read : {}", keyIds.size());
 		LOGGER.info("Reading Keys Info from serialized key file: end");
 	}
 
@@ -110,11 +108,15 @@ public class JwtTokenKeyService {
 		return privateKeyMap.get(keyId);
 	}
 
+	public Key getPublicKey(String keyId) {
+		return publicKeyMap.get(keyId);
+	}
+
 	private Key getDecodedPrivateKey(String privateKeyStr) {
 		byte[] decoded = Base64Utils.decodeFromString(privateKeyStr);
 		Key privateKey = null;
 		try {
-			privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decoded));
+			privateKey = KeyFactory.getInstance(KEY_ALGORITHM).generatePrivate(new PKCS8EncodedKeySpec(decoded));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
 			LOGGER.error("Error in decoding privateKey", e);
 		}
@@ -122,32 +124,15 @@ public class JwtTokenKeyService {
 		return privateKey;
 	}
 
-	public class SigninKeyResolverAdapter implements SigningKeyResolver {
-		@Override
-		public Key resolveSigningKey(JwsHeader header, Claims claims) {
-			LOGGER.info("kid in header : {}", header.getKeyId());
-
-			String keyId = header.getKeyId();
-			if (StringUtils.isEmpty(keyId)) {
-				LOGGER.error("Header kid is missing in the token header with cliams: {} ", claims);
-				throw new JwtException("Header kid is missing in the token header with cliams " + claims);
-			}
-			Key key = privateKeyMap.get(keyId);
-
-			return key;
+	private Key getDecodedPublicKey(String publicKeyStr) {
+		byte[] decoded = Base64Utils.decodeFromString(publicKeyStr);
+		Key publicKey = null;
+		try {
+			publicKey = KeyFactory.getInstance(KEY_ALGORITHM).generatePublic(new X509EncodedKeySpec(decoded));
+		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+			LOGGER.error("Error in decoding public key", e);
 		}
 
-		@Override
-		public Key resolveSigningKey(JwsHeader header, String plaintext) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-	}
-
-	public SigningKeyResolver getResolver() {
-		if (null == resolver) {
-			resolver = new SigninKeyResolverAdapter();
-		}
-		return resolver;
+		return publicKey;
 	}
 }

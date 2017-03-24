@@ -1,11 +1,16 @@
 package com.onesandzeros.service.impl;
 
 import static com.onesandzeros.AppConstants.ACCOUNT_ACTIVATION_URL;
+import static com.onesandzeros.AppConstants.PWD_ENCRYPT_DECRYPT_KEY;
+import static com.onesandzeros.models.AccountStatus.ACTIVE;
+import static com.onesandzeros.models.AccountStatus.TOBEVERIFIED;
 
 import java.io.StringWriter;
+import java.security.Key;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 
+import javax.crypto.spec.SecretKeySpec;
 import javax.mail.MessagingException;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +29,7 @@ import com.onesandzeros.dao.UserAccountDao;
 import com.onesandzeros.exceptions.DaoException;
 import com.onesandzeros.exceptions.ServiceException;
 import com.onesandzeros.mail.service.MailClient;
+import com.onesandzeros.model.persistance.LoginStatus;
 import com.onesandzeros.model.persistance.RegistrationTokenEntity;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
@@ -31,12 +37,14 @@ import com.onesandzeros.model.register.LoginServiceResponse;
 import com.onesandzeros.model.register.Status;
 import com.onesandzeros.models.AccountType;
 import com.onesandzeros.models.UserInfo;
+import com.onesandzeros.service.LoginService;
 import com.onesandzeros.service.RegistrationTokenService;
+import com.onesandzeros.service.UsersLoginLogService;
 import com.onesandzeros.util.CommonUtil;
-import com.onesandzeros.util.EncryptDecryptUtil;
+import com.onesandzeros.util.EncryptDecryptData;
 
 @Component
-public class EmailLoginService {
+public class EmailLoginService implements LoginService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailLoginService.class);
 
@@ -50,12 +58,19 @@ public class EmailLoginService {
 	private VelocityEngine vEngine;
 
 	@Autowired
+	EncryptDecryptData encDecData;
+
+	@Autowired
 	private Environment env;
 
 	@Autowired
 	private RegistrationTokenService regService;
 
-	public LoginServiceResponse<UserInfo> emailLogin(LoginPayload loginPayload) throws ServiceException {
+	@Autowired
+	private UsersLoginLogService loginLogService;
+
+	@Override
+	public LoginServiceResponse<UserInfo> login(LoginPayload loginPayload) throws ServiceException {
 		UserInfo userInfo = new UserInfo();
 
 		validate(loginPayload);
@@ -74,17 +89,20 @@ public class EmailLoginService {
 			loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Login id/Password is incorrect"));
 			return loginResp;
 		}
-		if (!userAccEnt.isActive()) {
-			loginResp.setStatus(new Status(HttpStatus.BAD_REQUEST.value(), "Login id is not activated"));
+		if (!(userAccEnt.getStatus() == ACTIVE)) {
+			loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Login id is not activated"));
+			loginLogService.addLog(userAccEnt.getUserId(), LoginStatus.FAILURE, null);
 		} else {
 
 			if (!verifyPassword(loginPayload, userAccEnt)) {
 				loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Login id/Password is incorrect"));
+				loginLogService.addLog(userAccEnt.getUserId(), LoginStatus.FAILURE, null);
 				return loginResp;
 			}
 			userInfo = new UserInfo(userAccEnt.getName(), userAccEnt.getEmail());
 			loginResp.setStatus(new Status(HttpStatus.OK.value(), "Login successful"));
 			loginResp.setData(userInfo);
+			loginLogService.addLog(userAccEnt.getUserId(), LoginStatus.SUCCESS, null);
 		}
 
 		return loginResp;
@@ -104,7 +122,7 @@ public class EmailLoginService {
 
 			UserAccountEntity userAccEntity = addNewUser(loginPayload);
 			if (null != userAccEntity) {
-				Long userId = userAccEntity.getId();
+				Long userId = userAccEntity.getUserId();
 				RegistrationTokenEntity tokenEnt = regService.addHashTokenForActivation(userId);
 				String mailBody = generateMailBody(userAccEntity, tokenEnt);
 				mailClient.sendMail(loginPayload.getEmail(), mailBody);
@@ -127,31 +145,23 @@ public class EmailLoginService {
 			// TODO (Keep it simple - Query the to be activated table if there
 			// is an invalidated record validate, otherwise fail.Reduce query on
 			// master table
-			UserAccountEntity userActEnt = userActDao.findByEmail(email);
-			if (null == userActEnt) {
-				message = "Email Id is not registered, Invalid emailId";
-				return message;
-			}
 
-			if (userActEnt.isActive()) {
-				message = "Email Id is already activated";
-				return message;
-			}
-
-			boolean validToken = regService.validateToken(userActEnt.getId(), token);
+			boolean validToken = regService.validateToken(email, token);
 
 			if (!validToken) {
 				message = "Invalid token/Activation link might be expired";
 				return message;
 			}
 
-			userActEnt.setActive(true);
-			userActEnt.setEmailActivatedOn(new Timestamp(System.currentTimeMillis()));
-
-			userActDao.save(userActEnt);
+			// If registration token is valid, then update the status in
+			// UserAccountEntity table
+			int updateCount = userActDao.updateStatusByEmail(ACTIVE, email);
+			LOGGER.info("Updated Count : {}", updateCount);
 
 			message = "Account activated successfully";
-			// TODO: (Delete token once email is activated)
+
+			// Deleting the token once the account is activated successfully
+			regService.deleteByToken(token);
 
 		} catch (DaoException e) {
 			LOGGER.error("Error in fetching data from db", e);
@@ -182,11 +192,11 @@ public class EmailLoginService {
 		accountEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		accountEntity.setEmail(loginPayload.getEmail());
 
-		String encryptedPwd = EncryptDecryptUtil.encrypt(loginPayload.getPassword());
+		String encryptedPwd = encDecData.encrypt(loginPayload.getPassword(), getKeyForPwd());
 		accountEntity.setPassword(encryptedPwd);
 
 		accountEntity.setName(loginPayload.getName());
-		accountEntity.setActive(false);
+		accountEntity.setStatus(TOBEVERIFIED);
 		accountEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
 		userActDao.save(accountEntity);
@@ -194,7 +204,6 @@ public class EmailLoginService {
 	}
 
 	private String generateMailBody(UserAccountEntity userAcctEnt, RegistrationTokenEntity tokenEnt) {
-		// String emailTemplateStr = mailUtil.getEmailActivationTemplate();
 		Template template = vEngine.getTemplate("./templates/mail_template.html", "UTF-8");
 
 		String url = MessageFormat.format(env.getProperty(ACCOUNT_ACTIVATION_URL), userAcctEnt.getEmail(),
@@ -232,14 +241,18 @@ public class EmailLoginService {
 		boolean valid = false;
 		String userEntPwd = loginPayload.getPassword();
 
-		String encryptedPwd = userAccEnt.getPassword();
-		// TODO (Serious issue. Never ever decrypt the password. Encrypt the
-		// incoming password and compare with the stored encrypted password
-		String decryptedPwd = EncryptDecryptUtil.decrypt(encryptedPwd);
+		String encryptUsrEntPwd = encDecData.encrypt(userEntPwd, getKeyForPwd());
 
-		if (userEntPwd.equals(decryptedPwd)) {
+		if (encryptUsrEntPwd.equals(userAccEnt.getPassword())) {
 			valid = true;
 		}
 		return valid;
 	}
+
+	private Key getKeyForPwd() {
+		String encryptionKey = env.getProperty(PWD_ENCRYPT_DECRYPT_KEY);
+		Key key = new SecretKeySpec(encryptionKey.getBytes(), "AES");
+		return key;
+	}
+
 }

@@ -34,7 +34,9 @@ public class KeyData implements Serializable {
 
 	@Override
 	public String toString() {
-		return "KeyData [keyId=" + keyId + ", key=" + key + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("KeyData [keyId=").append(keyId).append(", key=").append(key).append("]");
+		return builder.toString();
 	}
 
 }

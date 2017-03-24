@@ -12,14 +12,20 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * A Rest service client used to make Rest api requests for the given url
  * 
  * @author swamy
  */
 @Component
-//TODO (is it really a util?)
-public class RestServiceUtil {
+// TODO (is it really a util?)
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RestServiceUtil.class);
+// This is not a util. Used as a Rest Client to make Rest api requests
+// This was used to get public key from the sso-server through api call, now
+// that logic is changed, now this class is not removed
+// Just kept this class so that in future we may use this
+public class RestClient {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(RestClient.class);
 
 	private static final RestTemplate restTemplate = new RestTemplate();
 

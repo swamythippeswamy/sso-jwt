@@ -28,7 +28,9 @@ public class ServiceResponse<T> implements Serializable {
 
 	@Override
 	public String toString() {
-		return "ServiceResponse [code=" + code + ", data=" + data + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("ServiceResponse [code=").append(code).append(", data=").append(data).append("]");
+		return builder.toString();
 	}
 
 }

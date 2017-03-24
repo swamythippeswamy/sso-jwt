@@ -14,5 +14,7 @@ import com.onesandzeros.model.persistance.RegistrationTokenEntity;
  */
 @Repository
 public interface RegistrationVerificationDao extends CrudRepository<RegistrationTokenEntity, Long> {
-	RegistrationTokenEntity findByUserIdAndHash(Long userId, String hash);
+	RegistrationTokenEntity findByEmailAndHash(String email, String hash);
+
+	Long deleteByHash(String token);
 }

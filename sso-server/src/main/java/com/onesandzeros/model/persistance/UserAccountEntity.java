@@ -14,6 +14,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.onesandzeros.models.AccountStatus;
 import com.onesandzeros.models.AccountType;
 
 /**
@@ -31,7 +32,8 @@ public class UserAccountEntity implements Serializable {
 	@Id
 	@GenericGenerator(name = "gen", strategy = "identity")
 	@GeneratedValue(generator = "gen", strategy = GenerationType.IDENTITY)
-	private Long id;
+	@Column(name = "user_id")
+	private Long userId;
 
 	@Column(name = "user_name")
 	private String name;
@@ -50,17 +52,19 @@ public class UserAccountEntity implements Serializable {
 	private AccountType accountType;
 
 	// TODO (Status is desirable - ACTIVE. SUSPEND. DELTE. TOBEVERIFIED). Other
-	// details of Tobeverified should be in another table (RegistrationTokenEntity)
-	@Column(name = "active")
-	private boolean active;
+	// details of Tobeverified should be in another table
+	// (RegistrationTokenEntity)
+	@Column(name = "status")
+	@Enumerated(EnumType.STRING)
+	private AccountStatus status;
 
 	@Column(name = "create_time")
 	private Timestamp createTime;
 
 	// TODO (This is not sufficient. Create db/file log entry for each
 	// login)UserId, source IP, status-SUC/FAIL should be logged
-	@Column(name = "last_login_time")
-	private Timestamp lastLoginTime;
+
+	// Created a separate table for tracking the user's last logins
 
 	@Column(name = "fb_user_id")
 	private String facebookUserId;
@@ -109,20 +113,20 @@ public class UserAccountEntity implements Serializable {
 		this.accountType = accountType;
 	}
 
-	public Long getId() {
-		return id;
+	public Long getUserId() {
+		return userId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
-	public boolean isActive() {
-		return active;
+	public AccountStatus getStatus() {
+		return status;
 	}
 
-	public void setActive(boolean active) {
-		this.active = active;
+	public void setStatus(AccountStatus status) {
+		this.status = status;
 	}
 
 	public Timestamp getCreateTime() {
@@ -141,14 +145,6 @@ public class UserAccountEntity implements Serializable {
 		this.facebookUserId = facebookUserId;
 	}
 
-	public Timestamp getLastLoginTime() {
-		return lastLoginTime;
-	}
-
-	public void setLastLoginTime(Timestamp lastLoginTime) {
-		this.lastLoginTime = lastLoginTime;
-	}
-
 	public Timestamp getEmailActivatedOn() {
 		return emailActivatedOn;
 	}
@@ -159,10 +155,13 @@ public class UserAccountEntity implements Serializable {
 
 	@Override
 	public String toString() {
-		return "UserAccountEntity [id=" + id + ", name=" + name + ", email=" + email + ", phone=" + phone
-				+ ", password=" + password + ", accountType=" + accountType + ", active=" + active + ", createTime="
-				+ createTime + ", lastLoginTime=" + lastLoginTime + ", facebookUserId=" + facebookUserId
-				+ ", emailActivatedOn=" + emailActivatedOn + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("UserAccountEntity [userId=").append(userId).append(", name=").append(name).append(", email=")
+				.append(email).append(", phone=").append(phone).append(", password=").append(password)
+				.append(", accountType=").append(accountType).append(", status=").append(status).append(", createTime=")
+				.append(createTime).append(", facebookUserId=").append(facebookUserId).append(", emailActivatedOn=")
+				.append(emailActivatedOn).append("]");
+		return builder.toString();
 	}
 
 }

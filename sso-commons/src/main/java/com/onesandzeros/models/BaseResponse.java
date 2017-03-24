@@ -36,7 +36,9 @@ public class BaseResponse<T> implements Serializable {
 
 	@Override
 	public String toString() {
-		return "ApiResponse [code=" + code + ", data=" + data + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("BaseResponse [code=").append(code).append(", data=").append(data).append("]");
+		return builder.toString();
 	}
 
 }

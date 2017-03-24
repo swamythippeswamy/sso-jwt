@@ -8,35 +8,36 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
 
 /**
- * This has methods for encrypting and decrypting a string useing AES encryption
+ * This has methods for encrypting and decrypting a string using AES encryption
  * with 128 bits key
  * 
  * @author swamy
  *
  */
-public class EncryptDecryptUtil {
+@Component
+public class EncryptDecryptData {
 
 	// TODO (why is the key hardcoded?). Either make it a service which can self
 	// read the key or let both the methods accept a key.Eitherways, it is
 	// recommended to make it a component
-	private static final String encryptionKey = "0n35uN7z36O5k3y5";
-	private static final Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(EncryptDecryptUtil.class);
+	// Key will be passed as a parameter
 
-	public static String encrypt(String data) {
+	private static final Logger LOGGER = LoggerFactory.getLogger(EncryptDecryptData.class);
+
+	public String encrypt(String data, Key key) {
 		String encryptedData = null;
-
+		LOGGER.info("Key Alg : {}", key.getAlgorithm());
 		try {
-			Cipher cipher = Cipher.getInstance("AES");
-			cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+			Cipher cipher = Cipher.getInstance(key.getAlgorithm());
+			cipher.init(Cipher.ENCRYPT_MODE, key);
 			byte[] encrypted = cipher.doFinal(data.getBytes());
 			encryptedData = Base64Utils.encodeToString(encrypted);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException
@@ -47,17 +48,17 @@ public class EncryptDecryptUtil {
 		return encryptedData;
 	}
 
-	public static String decrypt(String data) {
+	public String decrypt(String data, Key key) {
 		String decryptedData = null;
 		try {
-			Cipher cipher = Cipher.getInstance("AES");
-			cipher.init(Cipher.DECRYPT_MODE, aesKey);
+			Cipher cipher = Cipher.getInstance(key.getAlgorithm());
+			cipher.init(Cipher.DECRYPT_MODE, key);
 			byte[] encrypted = cipher.doFinal(Base64Utils.decodeFromString(data));
 			decryptedData = new String(encrypted);
 
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException
 				| InvalidKeyException e) {
-			LOGGER.error("Error in encrypting the data", e);
+			LOGGER.error("Error in decrypting the data", e);
 		}
 		return decryptedData;
 	}

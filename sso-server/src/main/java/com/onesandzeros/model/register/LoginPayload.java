@@ -75,7 +75,10 @@ public class LoginPayload implements Serializable {
 
 	@Override
 	public String toString() {
-		return "LoginPayload [name=" + name + ", email=" + email + ", phone=" + phone + ", password=" + password
-				+ ", accountType=" + accountType + ", token=" + token + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("LoginPayload [name=").append(name).append(", email=").append(email).append(", phone=")
+				.append(phone).append(", password=").append(password).append(", accountType=").append(accountType)
+				.append(", token=").append(token).append("]");
+		return builder.toString();
 	}
 }

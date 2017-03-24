@@ -48,7 +48,6 @@ public class MailClient {
 	private void setDefaultProps(MimeMessage msg) throws MessagingException {
 		msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
 		msg.addHeader("format", "flowed");
-		msg.addHeader("Content-Transfer-Encoding", "8bit");
 
 		msg.setFrom(new InternetAddress(env.getProperty(AppConstants.MAIL_USERNAME)));
 	}

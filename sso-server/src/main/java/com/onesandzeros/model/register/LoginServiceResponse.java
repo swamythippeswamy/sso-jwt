@@ -22,7 +22,9 @@ public class LoginServiceResponse<T> {
 
 	@Override
 	public String toString() {
-		return "LoginServiceResponse [status=" + status + ", data=" + data + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("LoginServiceResponse [status=").append(status).append(", data=").append(data).append("]");
+		return builder.toString();
 	}
 
 }

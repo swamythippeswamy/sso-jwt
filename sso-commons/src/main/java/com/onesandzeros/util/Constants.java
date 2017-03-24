@@ -1,6 +1,6 @@
 package com.onesandzeros.util;
 
-//TODO (unused)
-public class Constants {
-
+public interface Constants {
+	String JWT_TOKEN_KEY_ID = "kid";
+	String JWT_TOKEN_HEADER_PREFIX = "Bearer";
 }

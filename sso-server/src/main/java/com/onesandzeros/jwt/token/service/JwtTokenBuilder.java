@@ -1,5 +1,11 @@
 package com.onesandzeros.jwt.token.service;
 
+import static com.onesandzeros.AppConstants.JWT_TOKEN_HEADER_NAME;
+import static com.onesandzeros.AppConstants.JWT_TOKEN_HEADER_PREFIX;
+import static com.onesandzeros.AppConstants.JWT_TOKEN_ISSUER;
+import static com.onesandzeros.AppConstants.JWT_TOKEN_VALID_TIME;
+import static com.onesandzeros.util.Constants.JWT_TOKEN_KEY_ID;
+
 import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
@@ -13,7 +19,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.onesandzeros.models.KeyData;
 import com.onesandzeros.models.UserInfo;
-import com.onesandzeros.util.EncryptDecryptUtil;
+import com.onesandzeros.util.EncryptDecryptData;
 import com.onesandzeros.util.JsonUtil;
 
 import io.jsonwebtoken.Claims;
@@ -34,10 +40,13 @@ public class JwtTokenBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenBuilder.class);
 
 	@Autowired
-	Environment env;
+	private Environment env;
 
 	@Autowired
-	JwtTokenKeyService keyService;
+	private JwtTokenKeyServiceImpl keyService;
+
+	@Autowired
+	private EncryptDecryptData encDecData;
 
 	public void addAuthToken(HttpServletResponse response, UserInfo userInfo) {
 
@@ -46,8 +55,8 @@ public class JwtTokenBuilder {
 			String token = createAuthToken(tokenString);
 			LOGGER.info("Generated token for input obj : {} is {}", userInfo, token);
 
-			String jwtTokenPrefix = env.getProperty("jwt.token.prefix", "Bearer");
-			String jwtTokenHeaderName = env.getProperty("jwt.auth.header.name", "Authentication");
+			String jwtTokenPrefix = env.getProperty(JWT_TOKEN_HEADER_PREFIX, "Bearer");
+			String jwtTokenHeaderName = env.getProperty(JWT_TOKEN_HEADER_NAME, "Authentication");
 			response.setHeader(jwtTokenHeaderName, jwtTokenPrefix + " " + token);
 
 		} catch (JsonProcessingException e) {
@@ -55,21 +64,29 @@ public class JwtTokenBuilder {
 		}
 	}
 
+	/**
+	 * Returns the jwt token Same Key is used for encrypting the userInfo in jwt
+	 * claims and for signing the jwt token. The keyId is added to claim with
+	 * key name kid
+	 * 
+	 * @param tokenString
+	 * @return
+	 */
 	private String createAuthToken(String tokenString) {
 		JwtBuilder builder = Jwts.builder();
 
 		long currentTime = System.currentTimeMillis();
-		long expiryTime = System.currentTimeMillis() + Long.parseLong(env.getProperty("jwt.token.validity.time"));
-
-		Claims claims = Jwts.claims();
-		claims.setSubject(EncryptDecryptUtil.encrypt(tokenString));
-		claims.setIssuedAt(new Date(currentTime));
-		claims.setExpiration(new Date(expiryTime));
-		claims.setIssuer(env.getProperty("jwt.token.issuer"));
+		long expiryTime = System.currentTimeMillis() + Long.parseLong(env.getProperty(JWT_TOKEN_VALID_TIME));
 		KeyData keyData = keyService.getOnePrivateKeyRandomly();
 
-		builder.setHeaderParam("kid", keyData.getKeyId()).setClaims(claims).signWith(SignatureAlgorithm.RS256,
-				keyData.getKey());
+		Claims claims = Jwts.claims();
+		claims.setIssuedAt(new Date(currentTime));
+		claims.setExpiration(new Date(expiryTime));
+		claims.setIssuer(env.getProperty(JWT_TOKEN_ISSUER));
+		claims.put(JWT_TOKEN_KEY_ID, keyData.getKeyId());
+		claims.setSubject(encDecData.encrypt(tokenString, keyData.getKey()));
+
+		builder.setClaims(claims).signWith(SignatureAlgorithm.RS256, keyData.getKey());
 		return builder.compact();
 	}
 

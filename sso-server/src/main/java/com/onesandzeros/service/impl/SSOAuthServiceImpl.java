@@ -1,10 +1,5 @@
 package com.onesandzeros.service.impl;
 
-import static com.onesandzeros.models.AccountType.EMAIL;
-import static com.onesandzeros.models.AccountType.FACEBOOK;
-import static com.onesandzeros.models.AccountType.GOOGLE;
-import static com.onesandzeros.models.AccountType.PHONE;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -25,6 +20,7 @@ import com.onesandzeros.model.register.LoginServiceResponse;
 import com.onesandzeros.models.BaseResponse;
 import com.onesandzeros.models.SessionData;
 import com.onesandzeros.models.UserInfo;
+import com.onesandzeros.service.LoginService;
 import com.onesandzeros.service.SSOAuthService;
 
 @Service
@@ -39,10 +35,10 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 	private EmailLoginService emailLoginService;
 
 	@Autowired
-	private FacebookLoginService facebookLoginService;
+	private UserAccountDao ssoAuthDao;
 
 	@Autowired
-	private UserAccountDao ssoAuthDao;
+	private LoginServiceFactory loginServiceFactory;
 
 	@Override
 	@Transactional
@@ -59,19 +55,10 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 		}
 
 		try {
+			LoginService loginService = loginServiceFactory.getLoginService(loginPayload.getAccountType());
 
-			// TODO: (Swamy) Use factory pattern to get which login service to
-			// use
-			if (loginPayload.getAccountType() == EMAIL) {
-				loginServiceResp = emailLoginService.emailLogin(loginPayload);
-			} else if (loginPayload.getAccountType() == FACEBOOK) {
-				loginServiceResp = facebookLoginService.login(loginPayload);
+			loginServiceResp = loginService.login(loginPayload);
 
-			} else if (loginPayload.getAccountType() == GOOGLE) {
-
-			} else if (loginPayload.getAccountType() == PHONE) {
-
-			}
 			LOGGER.info("loginServiceResp : {}", loginServiceResp);
 
 			resp.setCode(loginServiceResp.getStatus().getCode());
@@ -82,6 +69,7 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 			} else {
 				LOGGER.error("Auth token not generated, since userinfo not available in loginServiceResponse");
 			}
+
 		} catch (ServiceException e) {
 			resp.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			resp.setData(e.getMessage());

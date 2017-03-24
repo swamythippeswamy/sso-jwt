@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.onesandzeros.aspects.JwtAuthentication;
 import com.onesandzeros.exceptions.ServiceException;
-import com.onesandzeros.jwt.token.service.JwtTokenKeyService;
+import com.onesandzeros.jwt.token.service.JwtTokenKeyServiceImpl;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
 import com.onesandzeros.models.BaseResponse;
@@ -36,7 +35,7 @@ public class SSOAuthController {
 	SSOAuthService ssoService;
 
 	@Autowired
-	JwtTokenKeyService jwtSigningKeyService;
+	JwtTokenKeyServiceImpl jwtSigningKeyService;
 
 	@RequestMapping("/login")
 	public @ResponseBody BaseResponse<String> login(@RequestBody LoginPayload loginPayload, HttpServletRequest request,

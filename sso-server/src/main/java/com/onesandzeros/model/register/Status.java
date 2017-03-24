@@ -35,7 +35,9 @@ public class Status implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Status [code=" + code + ", message=" + message + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("Status [code=").append(code).append(", message=").append(message).append("]");
+		return builder.toString();
 	}
 
 }

@@ -4,12 +4,12 @@ import java.io.Serializable;
 
 /**
  * Model used for storing the user's session data
- * 
- * @author ubuntu
+ *
  *
  */
 public class UserInfo implements Serializable {
 	private static final long serialVersionUID = -6870910757476030312L;
+	private Long userId;
 	private String userName;
 	private String emailId;
 	private AccountType accountType;
@@ -23,6 +23,14 @@ public class UserInfo implements Serializable {
 	public UserInfo(String userName, String emailId) {
 		this.userName = userName;
 		this.emailId = emailId;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
 	public String getUserName() {
@@ -67,8 +75,11 @@ public class UserInfo implements Serializable {
 
 	@Override
 	public String toString() {
-		return "UserInfo [userName=" + userName + ", emailId=" + emailId + ", accountType=" + accountType + ", role="
-				+ role + ", fbUserId=" + fbUserId + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("UserInfo [userId=").append(userId).append(", userName=").append(userName).append(", emailId=")
+				.append(emailId).append(", accountType=").append(accountType).append(", role=").append(role)
+				.append(", fbUserId=").append(fbUserId).append("]");
+		return builder.toString();
 	}
 
 }

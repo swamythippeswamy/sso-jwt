@@ -2,13 +2,14 @@ package com.onesandzeros.model.social;
 
 public class FaceBookAuthResponse {
 
-	public static final int SUCCESS = 0;
-	public static final int FAILED = 1;
+	public static enum Status {
+		SUCCESS, FAILED
+	}
 
 	String email;
 	String userId;
 	String name;
-	int status = SUCCESS;
+	Status status = Status.SUCCESS;
 	boolean expired;
 	boolean invalid;
 
@@ -36,11 +37,11 @@ public class FaceBookAuthResponse {
 		this.name = name;
 	}
 
-	public int getStatus() {
+	public Status getStatus() {
 		return status;
 	}
 
-	public void setStatus(int status) {
+	public void setStatus(Status status) {
 		this.status = status;
 	}
 

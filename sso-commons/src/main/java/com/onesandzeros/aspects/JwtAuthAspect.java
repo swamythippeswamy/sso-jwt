@@ -11,17 +11,18 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import com.onesandzeros.jwt.token.service.JwtTokenKeyService;
 import com.onesandzeros.jwt.token.service.JwtTokenParser;
 import com.onesandzeros.models.BaseResponse;
 import com.onesandzeros.models.JwtTokenParserResponse;
 import com.onesandzeros.models.SessionData;
 import com.onesandzeros.models.UserInfo;
-import com.onesandzeros.util.EncryptDecryptUtil;
+import com.onesandzeros.util.Constants;
+import com.onesandzeros.util.EncryptDecryptData;
 import com.onesandzeros.util.JsonUtil;
 
 import io.jsonwebtoken.Claims;
@@ -43,8 +44,13 @@ public class JwtAuthAspect {
 	Environment env;
 
 	@Autowired
-	@Qualifier("jwtTokenParser")
 	private JwtTokenParser tokenParser;
+
+	@Autowired
+	JwtTokenKeyService jwtTokenKeyService;
+
+	@Autowired
+	private EncryptDecryptData encDecData;
 
 	@Autowired
 	private HttpServletRequest request;
@@ -57,7 +63,7 @@ public class JwtAuthAspect {
 
 		Object obj = null;
 
-		if (!LOGGER.isDebugEnabled()) {
+		if (LOGGER.isDebugEnabled()) {
 			logReqHeaders(request);
 		}
 
@@ -97,7 +103,9 @@ public class JwtAuthAspect {
 		// verified
 		LOGGER.info("Before initializing sessin data : {}", SessionData.getUserInfo());
 		String encryptedUserData = tokenClaims.getSubject();
-		String decryptedUserData = EncryptDecryptUtil.decrypt(encryptedUserData);
+
+		String keyId = (String) tokenClaims.get(Constants.JWT_TOKEN_KEY_ID);
+		String decryptedUserData = encDecData.decrypt(encryptedUserData, jwtTokenKeyService.getPublicKey(keyId));
 		UserInfo userInfo = JsonUtil.deserialize(decryptedUserData, UserInfo.class);
 
 		SessionData.setUserInfo(userInfo);

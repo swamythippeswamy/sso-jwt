@@ -6,6 +6,8 @@ public interface RegistrationTokenService {
 
 	RegistrationTokenEntity addHashTokenForActivation(Long userId);
 
-	boolean validateToken(Long userId, String token);
+	boolean validateToken(String emailId, String token);
+
+	void deleteByToken(String token);
 
 }

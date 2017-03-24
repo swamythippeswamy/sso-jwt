@@ -1,5 +1,7 @@
 package com.onesandzeros.social.auth.service;
 
+import static com.onesandzeros.model.social.FaceBookAuthResponse.Status.FAILED;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -49,7 +51,7 @@ public class FacebookAuthentication {
 			if (e.getErrorCode() == INVALID_TOKEN_ERROR_CODE) {
 				authResponse.setInvalid(true);
 			}
-			authResponse.setStatus(FaceBookAuthResponse.FAILED);
+			authResponse.setStatus(FAILED);
 			return authResponse;
 		}
 
@@ -59,7 +61,7 @@ public class FacebookAuthentication {
 			authResponse.setEmail(user.getEmail());
 		} else {
 			LOGGER.error("Error in getting userInfo from facebook");
-			authResponse.setStatus(FaceBookAuthResponse.FAILED);
+			authResponse.setStatus(FAILED);
 		}
 
 		return authResponse;

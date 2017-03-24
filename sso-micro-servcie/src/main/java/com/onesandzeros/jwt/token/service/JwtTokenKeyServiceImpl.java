@@ -21,23 +21,18 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import com.onesandzeros.models.JwtTokensKeyPair;
 import com.onesandzeros.util.CommonUtil;
 import com.onesandzeros.util.JsonUtil;
-import com.onesandzeros.util.RestServiceUtil;
+import com.onesandzeros.util.RestClient;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.SigningKeyResolver;
+@Service("tokenKeyService")
+public class JwtTokenKeyServiceImpl implements JwtTokenKeyService {
 
-@Service
-public class JwtTokenKeyService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenKeyServiceImpl.class);
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenKeyService.class);
-
+	private static final String KEY_ALGORITHM = "RSA";
 	/**
 	 * Contains map of keyId and {@link JwtTokensKeyPair} having (keyId and
 	 * publickKey)
@@ -45,13 +40,11 @@ public class JwtTokenKeyService {
 	private Map<String, JwtTokensKeyPair> keyPairMap = new HashMap<>();
 	private Map<String, Key> publicKeys = new HashMap<String, Key>();
 
-	private SigningKeyResolver resolver;
-
 	@Autowired
 	Environment env;
 
 	@Autowired
-	RestServiceUtil restUtil;
+	RestClient restClient;
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
@@ -83,40 +76,11 @@ public class JwtTokenKeyService {
 		byte[] decoded = Base64Utils.decodeFromString(publicKeyStr);
 		Key publicKey = null;
 		try {
-			publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decoded));
+			publicKey = KeyFactory.getInstance(KEY_ALGORITHM).generatePublic(new X509EncodedKeySpec(decoded));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			LOGGER.error("Error in decoding privateKey", e);
+			LOGGER.error("Error in decoding public key", e);
 		}
 
 		return publicKey;
 	}
-
-	public class SigninKeyResolverAdapter implements SigningKeyResolver {
-		@Override
-		public Key resolveSigningKey(JwsHeader header, Claims claims) {
-			LOGGER.info("kid in header : {}", header.getKeyId());
-
-			String keyId = header.getKeyId();
-			if (StringUtils.isEmpty(keyId)) {
-				LOGGER.error("Header kid is missing in the token header with cliams: {} ", claims);
-				throw new JwtException("Header kid is missing in the token header with cliams " + claims);
-			}
-			Key key = publicKeys.get(keyId);
-
-			return key;
-		}
-
-		@Override
-		public Key resolveSigningKey(JwsHeader header, String plaintext) {
-			return null;
-		}
-	}
-
-	public SigningKeyResolver getResolver() {
-		if (null == resolver) {
-			resolver = new SigninKeyResolverAdapter();
-		}
-		return resolver;
-	}
-
 }

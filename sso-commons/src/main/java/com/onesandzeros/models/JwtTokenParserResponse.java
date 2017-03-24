@@ -42,7 +42,10 @@ public class JwtTokenParserResponse {
 
 	@Override
 	public String toString() {
-		return "JwtTokenParserResponse [claims=" + claims + ", message=" + message + ", status=" + status + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("JwtTokenParserResponse [claims=").append(claims).append(", message=").append(message)
+				.append(", status=").append(status).append("]");
+		return builder.toString();
 	}
 
 }
