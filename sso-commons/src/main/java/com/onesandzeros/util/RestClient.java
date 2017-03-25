@@ -17,12 +17,6 @@ import org.springframework.web.client.RestTemplate;
  * @author swamy
  */
 @Component
-// TODO (is it really a util?)
-
-// This is not a util. Used as a Rest Client to make Rest api requests
-// This was used to get public key from the sso-server through api call, now
-// that logic is changed, now this class is not removed
-// Just kept this class so that in future we may use this
 public class RestClient {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RestClient.class);

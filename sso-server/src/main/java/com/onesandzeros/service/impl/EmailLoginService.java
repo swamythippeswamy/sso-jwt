@@ -142,10 +142,6 @@ public class EmailLoginService implements LoginService {
 	public String activateEmailAccount(String email, String token) throws ServiceException {
 		String message = null;
 		try {
-			// TODO (Keep it simple - Query the to be activated table if there
-			// is an invalidated record validate, otherwise fail.Reduce query on
-			// master table
-
 			boolean validToken = regService.validateToken(email, token);
 
 			if (!validToken) {

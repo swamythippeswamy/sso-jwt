@@ -24,12 +24,6 @@ import org.springframework.util.Base64Utils;
 @Component
 public class EncryptDecryptData {
 
-	// TODO (why is the key hardcoded?). Either make it a service which can self
-	// read the key or let both the methods accept a key.Eitherways, it is
-	// recommended to make it a component
-
-	// Key will be passed as a parameter
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(EncryptDecryptData.class);
 
 	public String encrypt(String data, Key key) {
@@ -58,9 +52,8 @@ public class EncryptDecryptData {
 
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException
 				| InvalidKeyException e) {
+		}
 			LOGGER.error("Error in decrypting the data", e);
 		}
 		return decryptedData;
 	}
-
-}

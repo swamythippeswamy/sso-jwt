@@ -27,7 +27,6 @@ public class CommonUtil {
 		return validEmail;
 	}
 
-	// TODO (For now support four characters also)
 	/**
 	 * 
 	 * Matches for Minimum any 4 characters

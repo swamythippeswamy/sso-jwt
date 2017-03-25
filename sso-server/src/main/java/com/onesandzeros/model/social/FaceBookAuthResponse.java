@@ -63,8 +63,11 @@ public class FaceBookAuthResponse {
 
 	@Override
 	public String toString() {
-		return "FaceBookAuthResponse [email=" + email + ", userId=" + userId + ", name=" + name + ", status=" + status
-				+ ", expired=" + expired + ", invalid=" + invalid + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("FaceBookAuthResponse [email=").append(email).append(", userId=").append(userId)
+				.append(", name=").append(name).append(", status=").append(status).append(", expired=").append(expired)
+				.append(", invalid=").append(invalid).append("]");
+		return builder.toString();
 	}
 
 }

@@ -25,13 +25,6 @@ public interface UserAccountDao extends CrudRepository<UserAccountEntity, Long> 
 	@Query("update UserAccountEntity set status = ?1, emailActivatedOn = current_timestamp() where email = ?2")
 	int updateStatusByEmail(AccountStatus accountStatus, String email) throws DaoException;
 
-	// TODO (I could not get this. When it is find by facebook user id then why
-	// is account type needed. It is implied that account type is Facebook.
-	// Correct me if I am wrong.)
-
-	// Agreed, added this by thinking of using same userId column for facebook
-	// and google. Still we can have seperate column for google and facebook
-	// userids
 	UserAccountEntity findByFacebookUserId(String fbUserId) throws DaoException;
 
 }

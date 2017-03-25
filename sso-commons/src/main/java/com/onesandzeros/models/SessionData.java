@@ -8,14 +8,6 @@ package com.onesandzeros.models;
  *
  */
 public class SessionData {
-	// TODO (Why is thread local needed? I mean why single SessionData class and
-	// a static threadlocal. What is the reason for not creating more session
-	// data objects?)
-
-	// The user information present in the jwt token is parsed and kept
-	// in Threadlocal object for each request thread, so that this can be used
-	// anywhere in the code instead and decrypting and reading from token
-	// everytime
 	private static ThreadLocal<UserInfo> userInfo = new ThreadLocal<UserInfo>();
 
 	public static UserInfo getUserInfo() {

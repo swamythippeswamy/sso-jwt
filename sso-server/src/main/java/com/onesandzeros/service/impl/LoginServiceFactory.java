@@ -10,10 +10,10 @@ import com.onesandzeros.service.LoginService;
 public class LoginServiceFactory {
 
 	@Autowired
-	EmailLoginService emailLoginService;
+	private EmailLoginService emailLoginService;
 
 	@Autowired
-	FacebookLoginService facebookLoginService;
+	private FacebookLoginService facebookLoginService;
 
 	public LoginService getLoginService(AccountType accountType) {
 		LoginService loginService = null;

@@ -27,9 +27,6 @@ import com.onesandzeros.service.UsersLoginLogService;
 import com.onesandzeros.social.auth.service.FacebookAuthentication;
 
 @Component
-// TODO (Login service can be an interface. FBLOgin, EmailLOgin etc can be
-// implementation. Use a factory to get the correct login service. THis way
-// adding more types of login in future will not be an issue
 public class FacebookLoginService implements LoginService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FacebookLoginService.class);
 
