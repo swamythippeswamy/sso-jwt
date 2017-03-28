@@ -123,7 +123,7 @@ public class EmailLoginService implements LoginService {
 			UserAccountEntity userAccEntity = addNewUser(loginPayload);
 			if (null != userAccEntity) {
 				Long userId = userAccEntity.getUserId();
-				RegistrationTokenEntity tokenEnt = regService.addHashTokenForActivation(userId);
+				RegistrationTokenEntity tokenEnt = regService.addHashTokenForActivation(userId, userAccEntity.getEmail());
 				String mailBody = generateMailBody(userAccEntity, tokenEnt);
 				mailClient.sendMail(loginPayload.getEmail(), mailBody);
 			}

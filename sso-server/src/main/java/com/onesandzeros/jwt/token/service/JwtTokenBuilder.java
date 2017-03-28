@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.onesandzeros.models.KeyData;
 import com.onesandzeros.models.UserInfo;
+import com.onesandzeros.util.Constants;
 import com.onesandzeros.util.EncryptDecryptData;
 import com.onesandzeros.util.JsonUtil;
 
@@ -86,7 +87,7 @@ public class JwtTokenBuilder {
 		claims.put(JWT_TOKEN_KEY_ID, keyData.getKeyId());
 		claims.setSubject(encDecData.encrypt(tokenString, keyData.getKey()));
 
-		builder.setClaims(claims).signWith(SignatureAlgorithm.RS256, keyData.getKey());
+		builder.setClaims(claims).signWith(SignatureAlgorithm.HS256, Constants.JWT_TOKEN_SIGNING_SECRET);
 		return builder.compact();
 	}
 

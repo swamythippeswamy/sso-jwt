@@ -28,10 +28,11 @@ public class RegistrationTokenServiceImpl implements RegistrationTokenService {
 	private Environment env;
 
 	@Override
-	public RegistrationTokenEntity addHashTokenForActivation(Long userId) {
+	public RegistrationTokenEntity addHashTokenForActivation(Long userId, String email) {
 		RegistrationTokenEntity tokenEnt = new RegistrationTokenEntity();
 		String hashToken = generateRandomStr();
 		tokenEnt.setUserId(userId);
+		tokenEnt.setEmail(email);
 		tokenEnt.setHash(hashToken);
 		tokenEnt.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		regVerDao.save(tokenEnt);

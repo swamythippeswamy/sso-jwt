@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.onesandzeros.models.JwtTokenParserResponse;
+import com.onesandzeros.util.Constants;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -33,7 +34,8 @@ public class JwtTokenParser {
 		try {
 			String jwtTokenVal = parseTokenValueFromHeader(jwtHeader);
 
-			Jws<Claims> claims = Jwts.parser().setSigningKeyResolver(keyResolver).parseClaimsJws(jwtTokenVal);
+			Jws<Claims> claims = Jwts.parser().setSigningKey(Constants.JWT_TOKEN_SIGNING_SECRET)
+					.parseClaimsJws(jwtTokenVal);
 			LOGGER.info("claims.getBody() : {}", claims.getBody());
 			if (null != claims && null != claims.getBody()) {
 				parserResp.setStatus(JwtTokenParserResponse.SUCCESS);

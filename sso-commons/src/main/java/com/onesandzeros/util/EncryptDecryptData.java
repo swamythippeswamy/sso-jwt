@@ -52,8 +52,8 @@ public class EncryptDecryptData {
 
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException
 				| InvalidKeyException e) {
-		}
 			LOGGER.error("Error in decrypting the data", e);
 		}
 		return decryptedData;
 	}
+}
