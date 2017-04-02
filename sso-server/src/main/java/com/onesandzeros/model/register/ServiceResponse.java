@@ -1,6 +1,9 @@
 package com.onesandzeros.model.register;
 
-public class LoginServiceResponse<T> {
+import java.io.Serializable;
+
+public class ServiceResponse<T> implements Serializable {
+	private static final long serialVersionUID = -3941295705330764813L;
 	private Status status;
 	private T data;
 

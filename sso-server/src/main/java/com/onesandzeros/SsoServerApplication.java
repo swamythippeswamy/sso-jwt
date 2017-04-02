@@ -2,6 +2,7 @@ package com.onesandzeros;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
@@ -11,6 +12,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -22,6 +25,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  */
 
 @SpringBootApplication(scanBasePackages = { "com.onesandzeros" })
+@EnableAsync
 // @ImportResource()
 public class SsoServerApplication {
 
@@ -50,5 +54,16 @@ public class SsoServerApplication {
 						.allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.OPTIONS.name());
 			}
 		};
+	}
+
+	@Bean(name = "mailTaskExecuter")
+	public Executor threadPoolTaskExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(2);
+		executor.setMaxPoolSize(20);
+		executor.setQueueCapacity(500);
+		executor.setThreadNamePrefix("mailSenderTaskExecutor-");
+		executor.initialize();
+		return executor;
 	}
 }

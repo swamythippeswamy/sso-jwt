@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.onesandzeros.exceptions.DaoException;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.models.AccountStatus;
+import com.onesandzeros.models.AccountType;
 
 /**
  * 
@@ -21,9 +22,15 @@ public interface UserAccountDao extends CrudRepository<UserAccountEntity, Long> 
 
 	UserAccountEntity findByEmail(String email) throws DaoException;
 
+	UserAccountEntity findByEmailAndAccountType(String email, AccountType accountType) throws DaoException;
+
 	@Modifying
 	@Query("update UserAccountEntity set status = ?1, emailActivatedOn = current_timestamp() where email = ?2")
 	int updateStatusByEmail(AccountStatus accountStatus, String email) throws DaoException;
+
+	@Modifying
+	@Query("update UserAccountEntity set password = ?1 where email = ?2")
+	int updatePwdByEmail(String password, String email) throws DaoException;
 
 	UserAccountEntity findByFacebookUserId(String fbUserId) throws DaoException;
 

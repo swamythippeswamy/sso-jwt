@@ -1,27 +1,25 @@
 package com.onesandzeros.service.impl;
 
-import static com.onesandzeros.AppConstants.ACCOUNT_ACTIVATION_URL;
+import static com.onesandzeros.AppConstants.ACCOUNT_VERIFICATION_SUCCESS_RESP_MSG;
+import static com.onesandzeros.AppConstants.MAIL_SUBJECT;
 import static com.onesandzeros.AppConstants.PWD_ENCRYPT_DECRYPT_KEY;
 import static com.onesandzeros.models.AccountStatus.ACTIVE;
 import static com.onesandzeros.models.AccountStatus.TOBEVERIFIED;
 
-import java.io.StringWriter;
 import java.security.Key;
 import java.sql.Timestamp;
-import java.text.MessageFormat;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +31,8 @@ import com.onesandzeros.model.persistance.LoginStatus;
 import com.onesandzeros.model.persistance.RegistrationTokenEntity;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
-import com.onesandzeros.model.register.LoginServiceResponse;
+import com.onesandzeros.model.register.ResetPassword;
+import com.onesandzeros.model.register.ServiceResponse;
 import com.onesandzeros.model.register.Status;
 import com.onesandzeros.models.AccountType;
 import com.onesandzeros.models.UserInfo;
@@ -55,9 +54,6 @@ public class EmailLoginService implements LoginService {
 	private MailClient mailClient;
 
 	@Autowired
-	private VelocityEngine vEngine;
-
-	@Autowired
 	EncryptDecryptData encDecData;
 
 	@Autowired
@@ -69,16 +65,19 @@ public class EmailLoginService implements LoginService {
 	@Autowired
 	private UsersLoginLogService loginLogService;
 
+	@Autowired
+	private MailContentService mailService;
+
 	@Override
-	public LoginServiceResponse<UserInfo> login(LoginPayload loginPayload) throws ServiceException {
+	public ServiceResponse<UserInfo> login(LoginPayload loginPayload, HttpServletRequest request) throws ServiceException {
 		UserInfo userInfo = new UserInfo();
 
 		validate(loginPayload);
-		LoginServiceResponse<UserInfo> loginResp = new LoginServiceResponse<>();
+		ServiceResponse<UserInfo> loginResp = new ServiceResponse<>();
 		UserAccountEntity userAccEnt;
 
 		try {
-			userAccEnt = userActDao.findByEmail(loginPayload.getEmail());
+			userAccEnt = userActDao.findByEmailAndAccountType(loginPayload.getEmail(), AccountType.EMAIL);
 		} catch (DaoException e) {
 			loginResp.setStatus(
 					new Status(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error fetching login details from db"));
@@ -86,7 +85,8 @@ public class EmailLoginService implements LoginService {
 		}
 
 		if (null == userAccEnt) {
-			loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Login id/Password is incorrect"));
+			loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(),
+					"This email is not registered, please register to login"));
 			return loginResp;
 		}
 		if (!(userAccEnt.getStatus() == ACTIVE)) {
@@ -94,7 +94,7 @@ public class EmailLoginService implements LoginService {
 			loginLogService.addLog(userAccEnt.getUserId(), LoginStatus.FAILURE, null);
 		} else {
 
-			if (!verifyPassword(loginPayload, userAccEnt)) {
+			if (!verifyPassword(loginPayload.getPassword(), userAccEnt)) {
 				loginResp.setStatus(new Status(HttpStatus.UNAUTHORIZED.value(), "Login id/Password is incorrect"));
 				loginLogService.addLog(userAccEnt.getUserId(), LoginStatus.FAILURE, null);
 				return loginResp;
@@ -102,40 +102,32 @@ public class EmailLoginService implements LoginService {
 			userInfo = new UserInfo(userAccEnt.getName(), userAccEnt.getEmail());
 			loginResp.setStatus(new Status(HttpStatus.OK.value(), "Login successful"));
 			loginResp.setData(userInfo);
-			loginLogService.addLog(userAccEnt.getUserId(), LoginStatus.SUCCESS, null);
+			loginLogService.addLog(userAccEnt.getUserId(), LoginStatus.SUCCESS, request.getRemoteAddr());
 		}
 
 		return loginResp;
 
 	}
 
-	@Transactional
-	public LoginServiceResponse<UserInfo> signUp(LoginPayload loginPayload) throws ServiceException {
-		LoginServiceResponse<UserInfo> resp = new LoginServiceResponse<>();
-		validateSignUpData(loginPayload);
+	@Transactional(rollbackFor = ServiceException.class)
+	@Async("mailTaskExecuter")
+	public void addUserAndSendVerificationMail(LoginPayload loginPayload) throws ServiceException {
 		try {
-
-			if (isEmailAlreadyExists(loginPayload.getEmail())) {
-				resp.setStatus(new Status(HttpStatus.BAD_REQUEST.value(), "EmailId is already registered"));
-				return resp;
-			}
 
 			UserAccountEntity userAccEntity = addNewUser(loginPayload);
 			if (null != userAccEntity) {
 				Long userId = userAccEntity.getUserId();
-				RegistrationTokenEntity tokenEnt = regService.addHashTokenForActivation(userId, userAccEntity.getEmail());
-				String mailBody = generateMailBody(userAccEntity, tokenEnt);
-				mailClient.sendMail(loginPayload.getEmail(), mailBody);
+				RegistrationTokenEntity tokenEnt = regService.addHashTokenForActivation(userId,
+						userAccEntity.getEmail());
+				String mailBody = mailService.generateAcntVerficationMailBody(userAccEntity, tokenEnt);
+				String subject = env.getProperty(MAIL_SUBJECT);
+				mailClient.sendMail(loginPayload.getEmail(), mailBody, subject);
 			}
 
 		} catch (MessagingException e) {
 			LOGGER.error("Error in sending mail to the entered emailId", e);
 			throw new ServiceException("Error in sending mail to the entered emailId");
 		}
-		resp.setStatus(
-				new Status(HttpStatus.OK.value(), "A mail is sent to registered email id for account activation"));
-
-		return resp;
 	}
 
 	@Transactional
@@ -154,13 +146,19 @@ public class EmailLoginService implements LoginService {
 			int updateCount = userActDao.updateStatusByEmail(ACTIVE, email);
 			LOGGER.info("Updated Count : {}", updateCount);
 
-			message = "Account activated successfully";
+			message = env.getProperty(ACCOUNT_VERIFICATION_SUCCESS_RESP_MSG, "Account activated successfully");
 
+			UserAccountEntity userActEnt = userActDao.findByEmail(email);
+			String verfSuccessMailBody = mailService.generateAcntSuccessMailBody(userActEnt);
+			String subject = env.getProperty(MAIL_SUBJECT);
+			mailClient.sendMail(email, verfSuccessMailBody, subject);
 			// Deleting the token once the account is activated successfully
 			regService.deleteByToken(token);
 
 		} catch (DaoException e) {
-			LOGGER.error("Error in fetching data from db", e);
+			LOGGER.error("Error occured in querying db", e);
+		} catch (MessagingException e) {
+			LOGGER.error("Error in sending account activation success mail");
 		}
 
 		return message;
@@ -175,7 +173,7 @@ public class EmailLoginService implements LoginService {
 		}
 	}
 
-	private void validateSignUpData(LoginPayload loginPayload) throws ServiceException {
+	public void validateSignUpData(LoginPayload loginPayload) throws ServiceException {
 		if (StringUtils.isEmpty(loginPayload.getName())) {
 			throw new ServiceException("Name should not be empty");
 		}
@@ -199,27 +197,7 @@ public class EmailLoginService implements LoginService {
 		return accountEntity;
 	}
 
-	private String generateMailBody(UserAccountEntity userAcctEnt, RegistrationTokenEntity tokenEnt) {
-		Template template = vEngine.getTemplate("./templates/mail_template.html", "UTF-8");
-
-		String url = MessageFormat.format(env.getProperty(ACCOUNT_ACTIVATION_URL), userAcctEnt.getEmail(),
-				tokenEnt.getHash());
-
-		VelocityContext vContext = new VelocityContext();
-		vContext.put("name", userAcctEnt.getName());
-		vContext.put("url", url);
-
-		StringWriter stringWriter = new StringWriter();
-
-		template.merge(vContext, stringWriter);
-
-		String mailText = stringWriter.toString();
-
-		LOGGER.info("Generated velocity template : {}", mailText);
-		return mailText;
-	}
-
-	private boolean isEmailAlreadyExists(String email) {
+	public boolean isEmailAlreadyExists(String email) {
 		boolean emailIdRegistered = false;
 		try {
 			UserAccountEntity userAccEnt = userActDao.findByEmail(email);
@@ -232,11 +210,9 @@ public class EmailLoginService implements LoginService {
 		return emailIdRegistered;
 	}
 
-	private boolean verifyPassword(LoginPayload loginPayload, UserAccountEntity userAccEnt) {
+	private boolean verifyPassword(String userEntPwd, UserAccountEntity userAccEnt) {
 
 		boolean valid = false;
-		String userEntPwd = loginPayload.getPassword();
-
 		String encryptUsrEntPwd = encDecData.encrypt(userEntPwd, getKeyForPwd());
 
 		if (encryptUsrEntPwd.equals(userAccEnt.getPassword())) {
@@ -251,4 +227,46 @@ public class EmailLoginService implements LoginService {
 		return key;
 	}
 
+	@Transactional
+	public ServiceResponse<String> resetPassword(ResetPassword resetPwd) throws ServiceException {
+		ServiceResponse<String> resp = new ServiceResponse<>();
+		String email = resetPwd.getEmail();
+		if (!CommonUtil.validateEmail(email)) {
+			throw new ServiceException("Invalid EmailId");
+		}
+		String oldPwd = resetPwd.getOldPassword();
+		if (!CommonUtil.validatePassword(oldPwd)) {
+			throw new ServiceException("Invalid Otp");
+		}
+
+		String newPwd = resetPwd.getNewPassword();
+		if (!CommonUtil.validatePassword(newPwd)) {
+			throw new ServiceException("Invalid New Password");
+		}
+
+		if (!resetPwd.validatePwds()) {
+			throw new ServiceException("Passwords are not matching");
+		}
+		try {
+			UserAccountEntity userAccEnt = userActDao.findByEmail(email);
+			if (null == userAccEnt) {
+				resp.setStatus(new Status(HttpStatus.BAD_REQUEST.value(), "EmailId not exist"));
+				return resp;
+			}
+
+			boolean valid = verifyPassword(oldPwd, userAccEnt);
+			if (!valid) {
+				throw new ServiceException("Invalid Password");
+			}
+			String encNewPwd = encDecData.encrypt(newPwd, getKeyForPwd());
+			int updateCount = userActDao.updatePwdByEmail(encNewPwd, email);
+			LOGGER.debug("Updated row counts : {}", updateCount);
+
+			resp.setData("Password updated Successfully");
+		} catch (DaoException e) {
+			LOGGER.error("Error in getting account infor from db");
+		}
+
+		return resp;
+	}
 }

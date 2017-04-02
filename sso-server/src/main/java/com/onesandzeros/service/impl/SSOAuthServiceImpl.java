@@ -16,7 +16,9 @@ import com.onesandzeros.exceptions.ServiceException;
 import com.onesandzeros.jwt.token.service.JwtTokenBuilder;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
-import com.onesandzeros.model.register.LoginServiceResponse;
+import com.onesandzeros.model.register.ServiceResponse;
+import com.onesandzeros.model.register.Status;
+import com.onesandzeros.model.register.ResetPassword;
 import com.onesandzeros.models.BaseResponse;
 import com.onesandzeros.models.SessionData;
 import com.onesandzeros.models.UserInfo;
@@ -46,7 +48,7 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 			LoginPayload loginPayload) throws ServiceException {
 
 		BaseResponse<String> resp = new BaseResponse<>();
-		LoginServiceResponse<UserInfo> loginServiceResp = null;
+		ServiceResponse<UserInfo> loginServiceResp = null;
 
 		if (loginPayload.getAccountType() == null) {
 			resp.setCode(HttpStatus.BAD_REQUEST.value());
@@ -57,7 +59,7 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 		try {
 			LoginService loginService = loginServiceFactory.getLoginService(loginPayload.getAccountType());
 
-			loginServiceResp = loginService.login(loginPayload);
+			loginServiceResp = loginService.login(loginPayload, request);
 
 			LOGGER.info("loginServiceResp : {}", loginServiceResp);
 
@@ -82,11 +84,19 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 			LoginPayload loginPayload) throws ServiceException {
 		BaseResponse<String> resp = new BaseResponse<>();
 		try {
-			LoginServiceResponse<UserInfo> loginResp = emailLoginService.signUp(loginPayload);
+			emailLoginService.validateSignUpData(loginPayload);
 
-			resp.setCode(loginResp.getStatus().getCode());
-			resp.setData(loginResp.getStatus().getMessage());
-			LOGGER.info("signUp Resp : {}", loginResp);
+			if (emailLoginService.isEmailAlreadyExists(loginPayload.getEmail())) {
+
+				resp.setCode(HttpStatus.BAD_REQUEST.value());
+				resp.setData("EmailId is already registered");
+			} else {
+				emailLoginService.addUserAndSendVerificationMail(loginPayload);
+
+				resp.setCode(HttpStatus.OK.value());
+				resp.setData("A mail is sent to registered email id for account activation");
+			}
+			LOGGER.info("signUp Resp : {}", resp);
 		} catch (ServiceException e) {
 			resp.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			resp.setData(e.getMessage());
@@ -119,6 +129,23 @@ public class SSOAuthServiceImpl implements SSOAuthService {
 			throw new ServiceException("Error in getting the data from db");
 		}
 		return entity;
+	}
+
+	@Override
+	public BaseResponse<String> resetPassword(HttpServletRequest request, HttpServletResponse response,
+			ResetPassword resetPwd) {
+		BaseResponse<String> resp = new BaseResponse<>();
+		try {
+			ServiceResponse<String> loginResp = emailLoginService.resetPassword(resetPwd);
+
+			resp.setCode(loginResp.getStatus().getCode());
+			resp.setData(loginResp.getStatus().getMessage());
+			LOGGER.info("Reset Password : {}", loginResp);
+		} catch (ServiceException e) {
+			resp.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			resp.setData(e.getMessage());
+		}
+		return resp;
 	}
 
 }

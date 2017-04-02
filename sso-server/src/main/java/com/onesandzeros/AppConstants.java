@@ -17,8 +17,12 @@ public interface AppConstants {
 
 	String MAIL_ACTIVATION_TEMPLATE = "mail.activation.template";
 
+	String SSO_AUTH_SERVER_BASE_URL = "sso.auth.server.base.url";
 	String ACCOUNT_ACTIVATION_URL = "account.activation.url";
+	String LOGIN_PAGE_URL = "login.page.url";
 
+	String ACCOUNT_VERIFICATION_SUCCESS_RESP_MSG = "account.verification.success.message";
+	
 	String PWD_ENCRYPT_DECRYPT_KEY = "password.encrypt.decrypt.key";
 
 	String JWT_TOKEN_HEADER_PREFIX = "jwt.token.header.prefix";

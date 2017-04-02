@@ -75,9 +75,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.facebook4j</groupId>
-			<artifactId>facebook4j-core</artifactId>
-			<version>[2.4,)</version>
+			<groupId>com.restfb</groupId>
+			<artifactId>restfb</artifactId>
+			<version>2.0.0-rc.2</version>
 		</dependency>
 
 		<!-- For Using Spring Security -->
@@ -102,6 +102,10 @@
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity</artifactId>
 			<version>1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-batch</artifactId>
 		</dependency>
 	</dependencies>
 

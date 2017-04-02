@@ -18,6 +18,7 @@ import com.onesandzeros.exceptions.ServiceException;
 import com.onesandzeros.jwt.token.service.JwtTokenKeyServiceImpl;
 import com.onesandzeros.model.persistance.UserAccountEntity;
 import com.onesandzeros.model.register.LoginPayload;
+import com.onesandzeros.model.register.ResetPassword;
 import com.onesandzeros.models.BaseResponse;
 import com.onesandzeros.service.SSOAuthService;
 
@@ -32,10 +33,7 @@ public class SSOAuthController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SSOAuthController.class);
 
 	@Autowired
-	SSOAuthService ssoService;
-
-	@Autowired
-	JwtTokenKeyServiceImpl jwtSigningKeyService;
+	private SSOAuthService ssoService;
 
 	@RequestMapping("/login")
 	public @ResponseBody BaseResponse<String> login(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
@@ -52,7 +50,9 @@ public class SSOAuthController {
 		return ssoService.signup(request, response, loginPayload);
 	}
 
-	// TODO: (Implement logout functionality)
+	// TODO: (Implement logout functionality )
+	// For JWT: Clear the token at client side, even if not cleared token will
+	// be invalidated after sometime
 	@RequestMapping("/logout")
 	public @ResponseBody BaseResponse<String> logout(@RequestBody LoginPayload loginPayload, HttpServletRequest request,
 			HttpServletResponse response) throws ServiceException {
@@ -68,6 +68,25 @@ public class SSOAuthController {
 		LOGGER.info("Activation api, params - email : {}, toekn : {}", emailId, token);
 
 		return ssoService.activateAccount(request, response, emailId, token);
+	}
+
+	// API for reseting the existing password
+	@RequestMapping("/resetPassword")
+	@JwtAuthentication
+	public @ResponseBody BaseResponse<String> verifyAccount(@RequestBody ResetPassword resetPwd,
+			HttpServletRequest request, HttpServletResponse response) throws ServiceException {
+		LOGGER.info("Activation api, params - email : {}, toekn : {}", resetPwd);
+		return ssoService.resetPassword(request, response, resetPwd);
+	}
+
+	// Redirect url configured in Facebook app settings
+	@RequestMapping("/facebook/redirect")
+	public @ResponseBody BaseResponse<String> verifyAccount(@RequestParam(name = "code", required = false) String code,
+			HttpServletRequest request, HttpServletResponse response) throws ServiceException {
+
+		LOGGER.info("Facebook Redirection {}", code);
+
+		return new BaseResponse<>();
 	}
 
 	// Testing api
